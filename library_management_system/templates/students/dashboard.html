@@ -1,0 +1,111 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Student Dashboard
+{% endblock %}
+
+{% load static %}
+
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>Welcome, Rahul!</h1>
+        <p>Good to see you back. Keep learning!</p>
+    </div>
+
+    <div class="profile-icon">
+        👤
+    </div>
+
+</div>
+
+
+<!-- Summary Cards -->
+
+<div class="summary-cards">
+
+    <div class="card">
+        <h4>Today's Status</h4>
+        <p class="status">Not Marked</p>
+    </div>
+
+    <div class="card">
+        <h4>My Seat</h4>
+        <p>A-12</p>
+    </div>
+
+    <div class="card">
+        <h4>Plan</h4>
+        <p>8 Hours</p>
+    </div>
+
+    <div class="card">
+        <h4>Valid Till</h4>
+        <p>25 Oct 2026</p>
+    </div>
+
+</div>
+
+
+<!-- Lower section -->
+
+<div class="dashboard-grid">
+
+    <div class="card schedule">
+
+        <div class="section-header">
+            <h3>Today's Schedule</h3>
+            <a href="#">View All</a>
+        </div>
+
+        <div class="schedule-item">
+            <span>◉</span>
+            <strong>9:00 AM – 5:00 PM</strong>
+            <span>(8 Hours)</span>
+        </div>
+
+    </div>
+
+
+    <div class="card quote">
+
+        <p>
+            "Discipline today builds a better tomorrow."
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- Quick Actions -->
+
+<div class="card">
+
+    <h3>Quick Actions</h3>
+
+    <div class="quick-actions">
+
+        <a href="#" class="action">
+            
+            <span>Mark Attendance</span>
+        </a>
+
+        <a href="#" class="action">
+            
+            <span>View Fee Details</span>
+        </a>
+
+        <a href="#" class="action">
+            <span>Upload Documents</span>
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

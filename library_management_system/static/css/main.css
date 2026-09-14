@@ -1,0 +1,151 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+
+.sidebar {
+    width: 230px;
+    background: white;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #333;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.sidebar a:hover {
+    background: #e8f1ff;
+}
+
+.logout {
+    margin-top: auto;
+}
+
+/* Main content */
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Header */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h1 {
+    margin-bottom: 5px;
+}
+
+.dashboard-header p {
+    margin-top: 0;
+    color: #666;
+}
+
+.profile-icon {
+    font-size: 30px;
+}
+
+/* Cards */
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.card h4 {
+    margin-top: 0;
+    color: #555;
+}
+
+.card p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.status {
+    color: red;
+}
+
+/* Schedule */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.schedule-item {
+    background: #eef5ff;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+/* Quick actions */
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.action {
+    border: 1px solid #ddd;
+    padding: 25px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    border-radius: 8px;
+}
+
+.action:hover {
+    background: #f0f6ff;
+}
