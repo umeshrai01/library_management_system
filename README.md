@@ -31,16 +31,16 @@ administrative operations from a single platform.
 ![Admin Dashboard](screenshots/Admin_Dashboard.png)
 
 ### Attendance Page
-![Attendance Page](screenshots/Attendance.png)
+![Attendance Page](screenshots/Attendance_Page.png)
 
 ### Active Subscriptions
-![Active Subscriptions](Active_Subscriptions.png)
+![Active Subscriptions](screenshots/Active_Subscriptions.png)
 
 ### Students page for Admin
-![Students page for Admin](Admin_Students.png)
+![Students page for Admin](screenshots/Admin_Students.png)
 
 ### Fee Management
-![Fee Management](Fee_Management.png)
+![Fee Management](screenshots/Fee_Management.png)
 
 
 
