@@ -6,8 +6,6 @@ administrative operations from a single platform.
 
 ## Project Screenshots
 
-## Screenshots
-
 ### Home Page
 
 ![Home Page](screenshots/Homepage.png)
@@ -33,16 +31,16 @@ administrative operations from a single platform.
 ![Admin Dashboard](screenshots/Admin_Dashboard.png)
 
 ### Attendance Page
-![Attendance](screenshots/Attendance.png)
+![Attendance Page](screenshots/Attendance.png)
 
 ### Active Subscriptions
-![Subscriptions](Active_Subscriptions.png)
+![Active Subscriptions](Active_Subscriptions.png)
 
 ### Students page for Admin
-![Students](Admin_Students.png)
+![Students page for Admin](Admin_Students.png)
 
 ### Fee Management
-![Fee_Management](Fee_Management.png)
+![Fee Management](Fee_Management.png)
 
 
 
