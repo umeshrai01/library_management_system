@@ -1,0 +1,2 @@
+[tool.vercel]
+entrypoint = "library_management_system/wsgi.py"

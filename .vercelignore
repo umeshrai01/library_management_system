@@ -1,0 +1,27 @@
+cat > .vercelignore <<'EOF'
+# Python
+library_management_system/.venv/
+library_management_system/venv/
+library_management_system/__pycache__/
+library_management_system/**/*.pyc
+
+# Local database
+library_management_system/db.sqlite3
+library_management_system/*.sqlite3
+
+# Student uploaded files
+library_management_system/media/
+
+# Generated static files
+library_management_system/staticfiles/
+
+# Environment files
+library_management_system/.env
+library_management_system/.env.*
+library_management_system/.env.local
+library_management_system/.env.vercel
+
+# Git/Vercel metadata
+.git/
+.vercel/
+EOF
