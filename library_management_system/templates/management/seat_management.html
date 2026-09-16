@@ -544,99 +544,24 @@
                 </div>
 
 
-                <!-- =================================
-                     TIME SLOT
-                     ================================= -->
-
-                <div class="seat-form-group">
-
-                    <label for="time_slot">
-                        Time Slot
-                    </label>
-
-                    <select
-                        name="time_slot"
-                        id="time_slot"
-                        required
-                    >
-
-                        <option value="">
-                            Select time slot
-                        </option>
-
-                        {% regroup time_slots by start_time as start_time_groups %}
-
-                        {% for group in start_time_groups %}
-
-                            {% with slot=group.list|first %}
-
-                                <option
-                                    value="{{ slot.slot_id }}"
-                                    data-start-time="{{ slot.start_time|time:'H:i' }}"
-                                >
-                                    {{ slot.start_time|time:"h:i A" }}
-                                </option>
-
-                            {% endwith %}
-
-                        {% empty %}
-
-    <option value="">
-        No start times available
-    </option>
-
-{% endfor %}
-
-                    </select>
-
-                </div>
-
-
-                <!-- =================================
-                        START TIME
-                        ================================= -->
-
+                    <!-- Start time -->
                     <div class="seat-form-group">
+            <label for="time_slot">Start Time</label>
 
-                        <label for="time_slot">
-                            Start Time
-                        </label>
+            <select name="time_slot" id="time_slot" required>
+                <option value="">Select a study slot</option>
 
-                        <select
-                            name="time_slot"
-                            id="time_slot"
-                            required
-                        >
-
-                            <option value="">
-                                Select start time
-                            </option>
-
-                            {% for slot in time_slots %}
-
-                                <option
-                                    value="{{ slot.slot_id }}"
-                                    data-start-time="{{ slot.start_time|time:'H:i' }}"
-                                >
-
-                                    {{ slot.start_time|time:"h:i A" }}
-
-                                </option>
-
-                            {% empty %}
-
-                                <option value="">
-                                    No start times available
-                                </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                        <small>
-                            Library opening time: 6:00 AM
-                        </small>
-
+                {% for slot in time_slots %}
+                    <option
+                        value="{{ slot.slot_id }}"
+                        data-start-time="{{ slot.start_time|time:'H:i' }}"
+                    >
+                        {{ slot.start_time|time:"h:i A" }}
+                    </option>
+                {% empty %}
+                    <option value="">No study slots available</option>
+                {% endfor %}
+            </select>
                     </div>
 
 
@@ -1115,77 +1040,37 @@
    AUTOMATIC END TIME
    ========================================== */
 
-function updateEndTime() {
+    function updateEndTime() {
+        const selectedPlan = planSelect.options[planSelect.selectedIndex];
+        const selectedSlot = timeSlotSelect.options[timeSlotSelect.selectedIndex];
 
-    const selectedPlan =
-        planSelect.options[
-            planSelect.selectedIndex
-        ];
+        if (
+            !selectedPlan ||
+            !selectedPlan.dataset.hours ||
+            !selectedSlot ||
+            !selectedSlot.dataset.startTime
+        ) {
+            endTimeInput.value = "";
+            endTimeInput.placeholder = "Select plan and start time";
+            return;
+        }
 
-    const selectedSlot =
-        timeSlotSelect.options[
-            timeSlotSelect.selectedIndex
-        ];
+        const hours = Number(selectedPlan.dataset.hours);
+        const [startHour, startMinute] = selectedSlot.dataset.startTime
+            .split(":")
+            .map(Number);
+        const end = new Date(2000, 0, 1, startHour, startMinute);
+        end.setHours(end.getHours() + hours);
 
-    if (
-        !selectedPlan ||
-        !selectedPlan.dataset.hours ||
-        !selectedSlot ||
-        !selectedSlot.dataset.startTime
-    ) {
+        const suffix = end.getHours() >= 12 ? "PM" : "AM";
+        const displayHour = end.getHours() % 12 || 12;
 
-        endTimeInput.value = "";
-
-        endTimeInput.placeholder =
-            "Select plan and start time";
-
-        return;
+        endTimeInput.value =
+            `${displayHour}:${String(end.getMinutes()).padStart(2, "0")} ${suffix}`;
     }
 
-    const hours =
-        parseInt(
-            selectedPlan.dataset.hours,
-            10
-        );
-
-    const startTime =
-        selectedSlot.dataset.startTime;
-
-    const [startHour, startMinute] =
-        startTime.split(":").map(Number);
-
-    const startDate = new Date();
-
-    startDate.setHours(
-        startHour,
-        startMinute,
-        0,
-        0
-    );
-
-    startDate.setHours(
-        startDate.getHours() + hours
-    );
-
-    let endHour =
-        startDate.getHours();
-
-    const endMinute =
-        startDate.getMinutes();
-
-    const ampm =
-        endHour >= 12 ? "PM" : "AM";
-
-    endHour =
-        endHour % 12;
-
-    if (endHour === 0) {
-        endHour = 12;
-    }
-
-    endTimeInput.value =
-        `${endHour}:${String(endMinute).padStart(2, "0")} ${ampm}`;
-    }
+    timeSlotSelect.addEventListener("change", updateEndTime);
+    updateEndTime();
 
     /* ==========================================
        PAYMENT SUMMARY
@@ -1274,7 +1159,7 @@ function updateEndTime() {
                 selectedStudent.dataset.plan;
 
 
-            const preferredSlot =
+            const preferredStartTime =
                 selectedStudent.dataset.startTime;
 
 

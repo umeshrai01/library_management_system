@@ -11,7 +11,7 @@
         <h1>Collect Payment</h1>
 
         <p>
-            Record a manual installment for an active subscription.
+            Record an installment or renew an expired subscription.
         </p>
 
     </div>
@@ -58,17 +58,19 @@
                         data-fee="{{ subscription.plan.fee }}"
                         data-paid="{{ subscription.total_paid }}"
                         data-remaining="{{ subscription.remaining_amount }}"
+                        data-renewal="{{ subscription.is_renewal|yesno:'true,false' }}"
                     >
 
                         {{ subscription.student.full_name }}
                         — {{ subscription.plan.name }}
+                        {% if subscription.is_renewal %}(renewal due){% endif %}
 
                     </option>
 
                 {% empty %}
 
                     <option value="">
-                        No active subscriptions available
+                        No payments or renewals available
                     </option>
 
                 {% endfor %}
@@ -100,25 +102,27 @@
 
                 {% for subscription in active_subscriptions %}
 
-                    {% if subscription.remaining_amount > 0 %}
+                    <option
+                        value="{{ subscription.subscription_id }}"
+                        data-student="{{ subscription.student.student_id }}"
+                        data-plan="{{ subscription.plan.name }}"
+                        data-fee="{{ subscription.plan.fee }}"
+                        data-paid="{{ subscription.total_paid }}"
+                        data-remaining="{{ subscription.remaining_amount }}"
+                        data-renewal="{{ subscription.is_renewal|yesno:'true,false' }}"
+                    >
 
-                        <option
-                            value="{{ subscription.subscription_id }}"
-                            data-student="{{ subscription.student.student_id }}"
-                            data-fee="{{ subscription.plan.fee }}"
-                            data-paid="{{ subscription.total_paid }}"
-                            data-remaining="{{ subscription.remaining_amount }}"
-                        >
-
-                            {{ subscription.student.full_name }}
-                            —
-                            {{ subscription.plan.name }}
-                            —
+                        {{ subscription.student.full_name }}
+                        —
+                        {{ subscription.plan.name }}
+                        —
+                        {% if subscription.is_renewal %}
+                            Renewal due · ₹{{ subscription.plan.fee }}
+                        {% else %}
                             ₹{{ subscription.remaining_amount }} remaining
+                        {% endif %}
 
-                        </option>
-
-                    {% endif %}
+                    </option>
 
                 {% endfor %}
 

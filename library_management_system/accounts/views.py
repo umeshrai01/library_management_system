@@ -7,6 +7,11 @@ from students.models import StudentProfile
 from library.models import SubscriptionPlan, TimeSlot
 
 
+def home(request):
+    """Render the public entry point for the library portal."""
+    return render(request, "home.html")
+
+
 def login(request):
 
     if request.method == "POST":
@@ -55,10 +60,19 @@ def login(request):
                 }
             )
 
+        if user.role not in {"OWNER", "STUDENT"}:
+            return render(
+                request,
+                "accounts/login.html",
+                {
+                    "error": "This account does not have portal access."
+                }
+            )
+
         auth_login(request, user)
 
-        # ADMIN / OWNER
-        if user.role in ["ADMIN", "OWNER"]:
+        # Management pages are reserved for library owners.
+        if user.role == "OWNER":
             return redirect("management:dashboard")
 
         # STUDENT

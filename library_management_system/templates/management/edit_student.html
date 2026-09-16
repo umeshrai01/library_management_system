@@ -236,11 +236,7 @@
                                 selected
                             {% endif %}
                         >
-                            {{ slot.name }}
-                            -
                             {{ slot.start_time|time:"h:i A" }}
-                            to
-                            {{ slot.end_time|time:"h:i A" }}
                         </option>
 
                     {% endfor %}

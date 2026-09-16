@@ -1,3 +1,8 @@
+from functools import wraps
+from django.core.exceptions import PermissionDenied
+from django.db.models import Prefetch, Q, Sum
+
+
 from datetime import time,date, timedelta, datetime
 from accounts.models import User
 from django.contrib import messages
@@ -13,6 +18,26 @@ from students.models import StudentProfile
 from django.utils import timezone
 from decimal import Decimal
 from payments.models import Payment, PaymentAllocation
+
+
+def owner_required(view_func):
+    """Allow management pages to be used only by library owners."""
+    @login_required
+    @wraps(view_func)
+    def wrapped_view(request, *args, **kwargs):
+        if request.user.role != "OWNER":
+            raise PermissionDenied("Only library owners can access management pages.")
+        return view_func(request, *args, **kwargs)
+
+    return wrapped_view
+
+
+def calculate_end_time(start_time, hours_per_day):
+    """Return the time reached after a plan's daily study duration."""
+    return (
+        datetime.combine(date.min, start_time)
+        + timedelta(hours=hours_per_day)
+    ).time()
 
 
 
@@ -479,17 +504,10 @@ def approve_student(request, student_id):
             # -------------------------------------
             # CREATE SEAT ALLOCATION
             # -------------------------------------
-            start_datetime = datetime.combine(
-                start_date,
+            calculated_end_time = calculate_end_time(
                 time_slot.start_time,
+                plan.hours_per_day,
             )
-
-            end_datetime = (
-                start_datetime
-                + timedelta(hours=plan.hours_per_day)
-            )
-
-            calculated_end_time = end_datetime.time()
 
 
 
@@ -1141,6 +1159,7 @@ def fee_management(request):
         Subscription.objects
         .filter(
             status="ACTIVE",
+            end_date__gte=timezone.localdate(),
         )
         .select_related(
             "student",
@@ -1289,9 +1308,9 @@ def collect_payment(request):
             Subscription.objects.select_related(
                 "student",
                 "plan",
+                "time_slot",
             ),
             subscription_id=subscription_id,
-            status="ACTIVE",
         )
 
         # ======================================
@@ -1308,6 +1327,26 @@ def collect_payment(request):
             return redirect(
                 "management:collect_payment"
             )
+
+        if subscription.student.status != "APPROVED":
+            messages.error(
+                request,
+                "Payments can only be collected for approved students.",
+            )
+            return redirect("management:collect_payment")
+
+        if subscription.status == "CANCELLED":
+            messages.error(
+                request,
+                "This subscription was cancelled and cannot be renewed.",
+            )
+            return redirect("management:collect_payment")
+
+        today = timezone.localdate()
+        is_renewal = (
+            subscription.status == "EXPIRED"
+            or subscription.end_date < today
+        )
 
         # ======================================
         # PAYMENT AMOUNT
@@ -1345,22 +1384,30 @@ def collect_payment(request):
         # CALCULATE ALREADY PAID
         # ======================================
 
-        already_paid = (
-            Payment.objects
-            .filter(
-                subscription=subscription,
-                status="PAID",
-            )
-            .aggregate(
-                total=models.Sum("amount")
-            )["total"]
-            or Decimal("0")
-        )
+        if is_renewal:
+            already_paid = Decimal("0")
+            remaining_amount = subscription.plan.fee
+        else:
+            if subscription.status != "ACTIVE":
+                messages.error(
+                    request,
+                    "This subscription is not available for payment.",
+                )
+                return redirect("management:collect_payment")
 
-        remaining_amount = (
-            subscription.plan.fee
-            - already_paid
-        )
+            already_paid = (
+                Payment.objects
+                .filter(
+                    subscription=subscription,
+                    status="PAID",
+                )
+                .aggregate(
+                    total=models.Sum("amount")
+                )["total"]
+                or Decimal("0")
+            )
+
+            remaining_amount = subscription.plan.fee - already_paid
 
         # ======================================
         # DON'T OVERPAY
@@ -1384,6 +1431,90 @@ def collect_payment(request):
         try:
 
             with transaction.atomic():
+
+                if is_renewal:
+                    previous_subscription = (
+                        Subscription.objects
+                        .select_for_update()
+                        .select_related("student", "plan", "time_slot")
+                        .get(subscription_id=subscription.subscription_id)
+                    )
+
+                    if Subscription.objects.filter(
+                        student=previous_subscription.student,
+                        status="ACTIVE",
+                        end_date__gte=today,
+                    ).exclude(
+                        subscription_id=previous_subscription.subscription_id
+                    ).exists():
+                        raise ValueError(
+                            "This student already has a current subscription."
+                        )
+
+                    previous_allocation = (
+                        SeatAllocation.objects
+                        .select_for_update()
+                        .select_related("seat")
+                        .filter(
+                            subscription=previous_subscription,
+                            status="ACTIVE",
+                        )
+                        .first()
+                    )
+
+                    if not previous_allocation:
+                        raise ValueError(
+                            "This expired subscription has no active seat to renew."
+                        )
+
+                    start_time = (
+                        previous_subscription.time_slot.start_time
+                        if previous_subscription.time_slot
+                        else previous_allocation.start_time
+                    )
+
+                    if start_time is None:
+                        raise ValueError(
+                            "The subscription has no start time to renew."
+                        )
+
+                    renewal_start_date = max(
+                        today,
+                        previous_subscription.end_date + timedelta(days=1),
+                    )
+                    renewal_end_date = (
+                        renewal_start_date
+                        + timedelta(days=previous_subscription.plan.duration_days - 1)
+                    )
+
+                    previous_subscription.status = "EXPIRED"
+                    previous_subscription.save(update_fields=["status"])
+
+                    previous_allocation.status = "ENDED"
+                    previous_allocation.save(update_fields=["status"])
+
+                    subscription = Subscription.objects.create(
+                        student=previous_subscription.student,
+                        plan=previous_subscription.plan,
+                        time_slot=previous_subscription.time_slot,
+                        start_date=renewal_start_date,
+                        end_date=renewal_end_date,
+                        status="ACTIVE",
+                    )
+
+                    SeatAllocation.objects.create(
+                        student=subscription.student,
+                        seat=previous_allocation.seat,
+                        subscription=subscription,
+                        start_date=renewal_start_date,
+                        end_date=renewal_end_date,
+                        start_time=start_time,
+                        end_time=calculate_end_time(
+                            start_time,
+                            subscription.plan.hours_per_day,
+                        ),
+                        status="ACTIVE",
+                    )
 
                 payment = Payment.objects.create(
                     student=subscription.student,
@@ -1415,15 +1546,26 @@ def collect_payment(request):
                 - new_total_paid
             )
 
-            messages.success(
-                request,
-                f"Payment of ₹{amount} recorded successfully. "
-                f"Remaining fee: ₹{new_remaining}."
-            )
+            if is_renewal:
+                messages.success(
+                    request,
+                    f"Subscription renewed through {subscription.end_date:%d %b %Y}. "
+                    f"₹{amount} received. Remaining fee: ₹{new_remaining}."
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Payment of ₹{amount} recorded successfully. "
+                    f"Remaining fee: ₹{new_remaining}."
+                )
 
             return redirect(
                 "management:fee_management"
             )
+
+        except ValueError as error:
+            messages.error(request, str(error))
+            return redirect("management:collect_payment")
 
         except Exception:
 
@@ -1444,6 +1586,7 @@ def collect_payment(request):
         Subscription.objects
         .filter(
             status="ACTIVE",
+            end_date__gte=timezone.localdate(),
         )
         .select_related(
             "student",
@@ -1481,14 +1624,35 @@ def collect_payment(request):
         )
 
         subscription.total_paid = total_paid
-        subscription.remaining_amount = max(
-            remaining,
-            Decimal("0")
-        )
+        subscription.remaining_amount = max(remaining, Decimal("0"))
+        subscription.is_renewal = False
 
-        subscription_data.append(
-            subscription
+        if subscription.remaining_amount > 0:
+            subscription_data.append(subscription)
+
+    active_student_ids = active_subscriptions.values("student_id")
+    renewable_subscriptions = (
+        Subscription.objects
+        .filter(
+            models.Q(status="EXPIRED")
+            | models.Q(status="ACTIVE", end_date__lt=timezone.localdate()),
+            student__status="APPROVED",
         )
+        .exclude(student_id__in=active_student_ids)
+        .select_related("student", "plan", "time_slot")
+        .order_by("student_id", "-end_date")
+    )
+
+    renewable_student_ids = set()
+    for subscription in renewable_subscriptions:
+        if subscription.student_id in renewable_student_ids:
+            continue
+
+        renewable_student_ids.add(subscription.student_id)
+        subscription.total_paid = Decimal("0")
+        subscription.remaining_amount = subscription.plan.fee
+        subscription.is_renewal = True
+        subscription_data.append(subscription)
 
     return render(
         request,
@@ -1796,7 +1960,10 @@ def seat_management(request):
 
                     start_time=time_slot.start_time,
 
-                    end_time=time_slot.end_time,
+                    end_time=calculate_end_time(
+                        time_slot.start_time,
+                        plan.hours_per_day,
+                    ),
 
                     status="ACTIVE",
                 )
@@ -2014,70 +2181,148 @@ def seat_management(request):
 
 @login_required
 def reports(request):
+    today = timezone.localdate()
+    month_start = today.replace(day=1)
+
+    monthly_revenue = (
+        Payment.objects
+        .filter(
+            status="PAID",
+            payment_date__date__gte=month_start,
+            payment_date__date__lte=today,
+        )
+        .aggregate(total=Sum("amount"))["total"]
+        or Decimal("0.00")
+    )
 
     return render(
         request,
-        "management/reports.html"
+        "management/reports.html",
+        {
+            "today": today,
+            "total_students": StudentProfile.objects.exclude(
+                status="UNREGISTERED"
+            ).count(),
+            "active_students": StudentProfile.objects.filter(
+                status="APPROVED"
+            ).count(),
+            "present_today": Attendance.objects.filter(
+                date=today,
+                status="PRESENT",
+            ).count(),
+            "monthly_revenue": monthly_revenue,
+            "available_seats": Seat.objects.filter(
+                status="AVAILABLE"
+            ).count(),
+            "occupied_seats": Seat.objects.filter(
+                status="OCCUPIED"
+            ).count(),
+            "expiring_subscriptions": Subscription.objects.filter(
+                status="ACTIVE",
+                end_date__range=[today, today + timedelta(days=7)],
+            ).select_related("student", "plan").order_by("end_date")[:10],
+            "recent_payments": Payment.objects.filter(
+                status="PAID"
+            ).select_related("student", "subscription__plan").order_by(
+                "-payment_date"
+            )[:10],
+        },
     )
 
 
 @login_required
 def settings(request):
+    library = Library.objects.first()
+
+    if request.method == "POST":
+        name = request.POST.get("library_name", "").strip()
+        address = request.POST.get("address", "").strip()
+        total_seats_value = request.POST.get("total_seats", "0").strip()
+
+        if not name or not address:
+            messages.error(request, "Library name and address are required.")
+            return redirect("management:settings")
+
+        try:
+            total_seats = int(total_seats_value)
+            if total_seats < 0:
+                raise ValueError
+        except ValueError:
+            messages.error(request, "Total seats must be a positive number.")
+            return redirect("management:settings")
+
+        if library is None:
+            library = Library.objects.create(
+                name=name,
+                address=address,
+                total_seats=total_seats,
+            )
+        else:
+            library.name = name
+            library.address = address
+            library.total_seats = total_seats
+            library.save(update_fields=["name", "address", "total_seats"])
+
+        messages.success(request, "Library settings saved successfully.")
+        return redirect("management:settings")
 
     return render(
         request,
-        "management/settings.html"
+        "management/settings.html",
+        {
+            "library": library,
+            "plans": SubscriptionPlan.objects.order_by("hours_per_day"),
+            "seat_count": Seat.objects.count(),
+        },
     )
 
 
 @login_required
 def subscriptions(request):
+    today = timezone.localdate()
 
-    today = timezone.now().date()
+    active_allocations = Prefetch(
+        "seat_allocations",
+        queryset=SeatAllocation.objects.filter(
+            status="ACTIVE"
+        ).select_related("seat"),
+        to_attr="current_allocations",
+    )
 
-    active_subscriptions = Subscription.objects.filter(
+    subscriptions = (
+        Subscription.objects
+        .select_related("student", "plan", "time_slot")
+        .prefetch_related(active_allocations)
+        .order_by("-start_date")
+    )
+
+    active_count = subscriptions.filter(
         status="ACTIVE",
         end_date__gte=today,
-    ).select_related(
-        "student",
-        "plan",
-        "time_slot",
-    ).prefetch_related(
-        "seat_allocations__seat",
-    ).order_by("end_date")
+    ).count()
 
-    expiring = Subscription.objects.filter(
+    expiring_count = subscriptions.filter(
         status="ACTIVE",
-        end_date__gte=today,
-        end_date__lte=today + timedelta(days=7),
-    ).select_related(
-        "student",
-        "plan",
-        "time_slot",
-    ).prefetch_related(
-        "seat_allocations__seat",
-    ).order_by("end_date")
+        end_date__range=[today, today + timedelta(days=7)],
+    ).count()
 
-    expired = Subscription.objects.filter(
-        end_date__lt=today,
-    ).select_related(
-        "student",
-        "plan",
-        "time_slot",
-    ).prefetch_related(
-        "seat_allocations__seat",
-    ).order_by("-end_date")
+    expired_count = subscriptions.filter(
+        Q(status="EXPIRED") |
+        Q(status="ACTIVE", end_date__lt=today)
+    ).count()
 
-    installment_count = 0
+    installment_count = Payment.objects.filter(status="PAID").count()
 
     return render(
         request,
         "management/subscriptions.html",
         {
-            "active_subscriptions": active_subscriptions,
-            "expiring": expiring,
-            "expired": expired,
+            "subscriptions": subscriptions,
+            "active_count": active_count,
+            "expiring_count": expiring_count,
+            "expired_count": expired_count,
             "installment_count": installment_count,
+            "today": today,
         },
     )
 
@@ -2247,6 +2492,8 @@ def students(request):
 
     status_filter = request.GET.get("status", "").strip()
     search_query = request.GET.get("search", "").strip()
+    today = timezone.localdate()
+    expiry_limit = today + timedelta(days=7)
 
     students_queryset = StudentProfile.objects.select_related(
         "user",
@@ -2256,7 +2503,25 @@ def students(request):
         "subscriptions__plan",
         "subscriptions__time_slot",
         "seat_allocations__seat",
-    ).order_by("-registration_date")
+    ).annotate(
+        list_priority=models.Case(
+            models.When(status="PENDING", then=models.Value(0)),
+            models.When(
+                subscriptions__status="ACTIVE",
+                subscriptions__end_date__range=(today, expiry_limit),
+                then=models.Value(1),
+            ),
+            default=models.Value(2),
+            output_field=models.IntegerField(),
+        ),
+        upcoming_expiry=models.Min(
+            "subscriptions__end_date",
+            filter=models.Q(
+                subscriptions__status="ACTIVE",
+                subscriptions__end_date__range=(today, expiry_limit),
+            ),
+        ),
+    ).order_by("list_priority", "upcoming_expiry", "-registration_date")
 
     # Search
     if search_query:

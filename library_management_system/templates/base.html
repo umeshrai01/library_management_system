@@ -1,124 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>
-        {% block title %}
-            Library Management System
-        {% endblock %}
-    </title>
-
-    {% load static %}
-
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <title>{% block title %}Bermo Library{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
-
-<body>
-
-<div>
-
-    <aside class="sidebar">
-
-        <div class="logo">
-            Bermo Library
-        </div>
-
-
-        <nav>
-
-            <!-- HOME -->
-
-            <a
-                href="{% url 'students_dashboard' %}"
-                class="{% if request.resolver_match.url_name == 'students_dashboard' %}active{% endif %}"
-            >
-                Home
+<body class="student-page">
+    <div class="student-shell">
+        <header class="student-mobile-header">
+            <a class="brand brand-compact" href="{% url 'students_dashboard' %}">
+                <span class="brand-mark">B</span><span><strong>Bermo</strong><small>Library</small></span>
             </a>
+            <button type="button" class="student-menu-toggle" id="studentMenuButton" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
+        </header>
 
-
-            <!-- ATTENDANCE -->
-
-            <a
-                href="{% url 'attendance:page' %}"
-                class="{% if request.resolver_match.app_name == 'attendance' %}active{% endif %}"
-            >
-                Mark Attendance
+        <aside class="student-sidebar" id="studentSidebar">
+            <a class="brand" href="{% url 'students_dashboard' %}">
+                <span class="brand-mark">B</span>
+                <span><strong>Bermo</strong><small>Library</small></span>
             </a>
+            <div class="student-profile-summary">
+                <span class="student-avatar student-avatar-large">{{ request.user.username|first|upper }}</span>
+                <div><strong>{{ request.user.student_profile.full_name|default:request.user.username }}</strong><span>Student member</span></div>
+            </div>
+            <nav class="student-nav" aria-label="Student navigation">
+                <a href="{% url 'students_dashboard' %}" class="{% if request.resolver_match.url_name == 'students_dashboard' %}active{% endif %}"><span>⌂</span>Overview</a>
+                <a href="{% url 'attendance:page' %}" class="{% if request.resolver_match.app_name == 'attendance' %}active{% endif %}"><span>◷</span>Attendance</a>
+                <a href="{% url 'students_subscriptions' %}" class="{% if request.resolver_match.url_name == 'students_subscriptions' %}active{% endif %}"><span>◫</span>My membership</a>
+                <a href="{% url 'students_seat' %}" class="{% if request.resolver_match.url_name == 'students_seat' %}active{% endif %}"><span>▦</span>My seat</a>
+                <a href="{% url 'students_documents' %}" class="{% if request.resolver_match.url_name == 'students_documents' %}active{% endif %}"><span>▱</span>Documents</a>
+                <a href="{% url 'students_profile' %}" class="{% if request.resolver_match.url_name == 'students_profile' %}active{% endif %}"><span>◉</span>Profile</a>
+            </nav>
+            <a class="sidebar-signout" href="{% url 'logout' %}"><span>↪</span>Sign out</a>
+        </aside>
+        <div class="student-sidebar-overlay" id="studentSidebarOverlay"></div>
 
-
-            <!-- SUBSCRIPTIONS -->
-
-            <a href="{% url 'students_subscriptions' %}" class="{% if request.resolver_match.url_name == 'students_subscriptions' %}active{% endif %}">
-            My Subscriptions
-            </a>
-
-
-            <!-- SEAT -->
-        <a href="{% url 'students_seat' %}" class="{% if request.resolver_match.url_name == 'students_seat' %}active{% endif %}">
-        My Seat
-        </a>
-
-
-            <!-- DOCUMENTS -->
-
-            <a
-                href="{% url 'students_documents' %}"
-                class="{% if request.resolver_match.url_name == 'students_documents' %}active{% endif %}"
-            >
-                Upload Documents
-            </a>
-
-
-            <!-- PROFILE -->
-
-            <a
-                href="{% url 'students_profile' %}"
-                class="{% if request.resolver_match.url_name == 'students_profile' %}active{% endif %}"
-            >
-                Profile
-            </a>
-
-        </nav>
-
-
-        <!-- LOGOUT -->
-
-        <div class="logout">
-
-            <a href="{% url 'logout' %}">
-                Logout
-            </a>
-
-        </div>
-
-    </aside>
-
-
-    <main class="main-content">
-
-        {% if messages %}
-
-            {% for message in messages %}
-
-                <div class="message {{ message.tags }}">
-                    {{ message }}
+        <main class="student-main-content">
+            <div class="student-topbar">
+                <p><span class="live-dot"></span>Library portal</p>
+                <div class="student-topbar-user"><span>{{ request.user.username|first|upper }}</span><strong>{{ request.user.username }}</strong></div>
+            </div>
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
                 </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-
-        {% block content %}
-        {% endblock %}
-
-    </main>
-
-</div>
-
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const button = document.getElementById("studentMenuButton");
+            const sidebar = document.getElementById("studentSidebar");
+            const overlay = document.getElementById("studentSidebarOverlay");
+            function closeMenu() { sidebar.classList.remove("open"); overlay.classList.remove("visible"); button.setAttribute("aria-expanded", "false"); }
+            function openMenu() { sidebar.classList.add("open"); overlay.classList.add("visible"); button.setAttribute("aria-expanded", "true"); }
+            button.addEventListener("click", function () { sidebar.classList.contains("open") ? closeMenu() : openMenu(); });
+            overlay.addEventListener("click", closeMenu);
+            window.addEventListener("resize", function () { if (window.innerWidth > 820) closeMenu(); });
+        });
+    </script>
 </body>
-
 </html>

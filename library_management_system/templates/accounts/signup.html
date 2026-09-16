@@ -1,308 +1,47 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Signup | Library Management System</title>
-
-    <link
-        rel="stylesheet"
-        href="{% static 'css/main.css' %}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Bermo Library</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
-
-
-<body>
-
-<div class="main-content">
-
-    <div class="card">
-
-        <h1>Student Registration</h1>
-
-        <p>
-            Create your library account.
-        </p>
-
-
-        {% if messages %}
-
-            {% for message in messages %}
-
-                <p class="status-pending">
-                    {{ message }}
-                </p>
-
-            {% endfor %}
-
-        {% endif %}
-
-
-        <form method="POST">
-
-            {% csrf_token %}
-
-
-            <table>
-
-                <!-- FULL NAME -->
-
-                <tr>
-
-                    <td>
-                        <label for="full_name">
-                            Full Name:
-                        </label>
-                    </td>
-
-                    <td>
-                        <input
-                            type="text"
-                            id="full_name"
-                            name="full_name"
-                            required
-                        >
-                    </td>
-
-                </tr>
-
-
-                <!-- EMAIL -->
-
-                <tr>
-
-                    <td>
-                        <label for="email">
-                            Email:
-                        </label>
-                    </td>
-
-                    <td>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                        >
-                    </td>
-
-                </tr>
-
-
-                <!-- PHONE -->
-
-                <tr>
-
-                    <td>
-                        <label for="phone">
-                            Phone:
-                        </label>
-                    </td>
-
-                    <td>
-                        <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            required
-                        >
-                    </td>
-
-                </tr>
-
-
-                <!-- ADDRESS -->
-
-                <tr>
-
-                    <td>
-                        <label for="address">
-                            Address:
-                        </label>
-                    </td>
-
-                    <td>
-                        <textarea
-                            id="address"
-                            name="address"
-                            rows="4"
-                            required
-                        ></textarea>
-                    </td>
-
-                </tr>
-
-
-                <!-- SUBSCRIPTION PLAN -->
-
-                <tr>
-
-                    <td>
-                        <label for="preferred_plan">
-                            Subscription Plan:
-                        </label>
-                    </td>
-
-                    <td>
-
-                        <select
-                            id="preferred_plan"
-                            name="preferred_plan"
-                            required
-                        >
-
-                            <option value="">
-                                Select Plan
-                            </option>
-
-                            {% for plan in subscription_plans %}
-
-                                <option value="{{ plan.plan_id }}">
-
-                                    {{ plan.name }}
-                                    -
-                                    {{ plan.hours_per_day }} Hours/Day
-                                    -
-                                    ₹{{ plan.fee }}
-
-                                </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </td>
-
-                </tr>
-
-
-                <!-- PREFERRED TIME SLOT -->
-
-                <tr>
-
-                    <td>
-                        <label for="preferred_time_slot">
-                            Preferred Time Slot:
-                        </label>
-                    </td>
-
-                    <td>
-
-                        <select
-                            id="preferred_time_slot"
-                            name="preferred_time_slot"
-                            required
-                        >
-
-                            <option value="">
-                                Select Time Slot
-                            </option>
-
-                            {% for slot in time_slots %}
-
-                                <option value="{{ slot.slot_id }}">
-
-                                    {{ slot.name }}
-                                    -
-                                    {{ slot.start_time|time:"h:i A" }}
-                                    -
-                                    {{ slot.end_time|time:"h:i A" }}
-
-                                </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </td>
-
-                </tr>
-
-
-                <!-- PASSWORD -->
-
-                <tr>
-
-                    <td>
-                        <label for="password">
-                            Password:
-                        </label>
-                    </td>
-
-                    <td>
-
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                        >
-
-                    </td>
-
-                </tr>
-
-
-                <!-- CONFIRM PASSWORD -->
-
-                <tr>
-
-                    <td>
-                        <label for="confirm_password">
-                            Confirm Password:
-                        </label>
-                    </td>
-
-                    <td>
-
-                        <input
-                            type="password"
-                            id="confirm_password"
-                            name="confirm_password"
-                            required
-                        >
-
-                    </td>
-
-                </tr>
-
-            </table>
-
-
-            <br>
-
-
-            <button type="submit">
-                Register
-            </button>
-
-        </form>
-
-
-        <br>
-
-
-        <p>
-            Already have an account?
-            <a href="{% url 'login' %}">
-                Login here
-            </a>
-        </p>
-
-    </div>
-
-</div>
-
+<body class="signup-page">
+    <header class="signup-header">
+        <a class="brand" href="{% url 'home' %}"><span class="brand-mark">B</span><span><strong>Bermo</strong><small>Library</small></span></a>
+        <p>Already a member? <a href="{% url 'login' %}">Log in</a></p>
+    </header>
+    <main class="signup-main">
+        <section class="signup-intro">
+            <p class="eyebrow">STUDENT REGISTRATION</p>
+            <h1>Claim your calm corner.</h1>
+            <p>Register your interest in a consistent study space. The library team will review your request and help you settle in.</p>
+            <div class="signup-note"><span>01</span><p><strong>It only takes a moment.</strong><br>Have your preferred plan and study time ready.</p></div>
+        </section>
+        <section class="signup-card">
+            {% if messages %}{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}{% endif %}
+            <form method="post" class="signup-form">
+                {% csrf_token %}
+                <fieldset><legend>About you</legend><p>We use this to create your member profile.</p>
+                    <div class="form-grid">
+                        <div class="auth-field"><label for="full_name">Full name</label><input type="text" id="full_name" name="full_name" placeholder="Your full name" required></div>
+                        <div class="auth-field"><label for="phone">Phone number</label><input type="tel" id="phone" name="phone" placeholder="Your contact number" required></div>
+                        <div class="auth-field form-full"><label for="email">Email address</label><input type="email" id="email" name="email" placeholder="you@example.com" required></div>
+                        <div class="auth-field form-full"><label for="address">Address</label><textarea id="address" name="address" rows="3" placeholder="Your area and city" required></textarea></div>
+                    </div>
+                </fieldset>
+                <fieldset><legend>Your study routine</legend><p>Tell us what will help you build a steady habit.</p>
+                    <div class="form-grid">
+                        <div class="auth-field"><label for="preferred_plan">Preferred plan</label><select id="preferred_plan" name="preferred_plan" required><option value="">Select a plan</option>{% for plan in subscription_plans %}<option value="{{ plan.plan_id }}">{{ plan.name }} · {{ plan.hours_per_day }} hrs/day · ₹{{ plan.fee }}</option>{% endfor %}</select></div>
+                        <div class="auth-field"><label for="preferred_time_slot">Preferred start time</label><select id="preferred_time_slot" name="preferred_time_slot" required><option value="">Select a start time</option>{% for slot in time_slots %}<option value="{{ slot.slot_id }}">{{ slot.start_time|time:"h:i A" }}</option>{% endfor %}</select></div>
+                    </div>
+                </fieldset>
+                <fieldset><legend>Secure your account</legend><p>Choose a password you do not use elsewhere.</p>
+                    <div class="form-grid"><div class="auth-field"><label for="password">Password</label><input type="password" id="password" name="password" autocomplete="new-password" placeholder="Create a password" required></div><div class="auth-field"><label for="confirm_password">Confirm password</label><input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" placeholder="Repeat your password" required></div></div>
+                </fieldset>
+                <button type="submit" class="button button-primary signup-submit">Submit registration <span aria-hidden="true">→</span></button>
+            </form>
+        </section>
+    </main>
 </body>
-
 </html>

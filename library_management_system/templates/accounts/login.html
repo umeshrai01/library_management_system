@@ -1,104 +1,37 @@
-{% load static %}
-
 <!DOCTYPE html>
-
-<html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Login | Library Management System</title>
-
-<link rel="stylesheet" href="{% static 'css/main.css' %}">
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | Bermo Library</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
-
-<body>
-
-<div class="main-content">
-
-<div class="card">
-
-    <h1>Please Login to Continue</h1>
-
-    <p>
-        Login to access your library account.
-    </p>
-
-    {% if messages %}
-        {% for message in messages %}
-            <p class="status-pending">
-                {{ message }}
-            </p>
-        {% endfor %}
-    {% endif %}
-
-    {% if error %}
-        <p class="status-expired">
-            {{ error }}
-        </p>
-    {% endif %}
-
-
-    <form method="post">
-
-        {% csrf_token %}
-
-        <table>
-
-            <tr>
-                <td>
-                    <label for="email">
-                        Email:
-                    </label>
-                </td>
-
-                <td>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
-                    >
-                </td>
-            </tr>
-
-
-            <tr>
-                <td>
-                    <label for="password">
-                        Password:
-                    </label>
-                </td>
-
-                <td>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                    >
-                </td>
-            </tr>
-
-        </table>
-
-        <br>
-
-        <button type="submit">
-            Login
-        </button>
-
-    </form>
-
-    <br>
-
-    <p>
-        New User?
-        <a href="{% url 'signup' %}">
-            Signup here
-        </a>
-    </p>
-
-</div>
-
-</div>
-
-</body> </html>
+<body class="auth-page">
+    <main class="auth-layout">
+        <section class="auth-art-panel" aria-hidden="true">
+            <a class="brand auth-brand" href="{% url 'home' %}"><span class="brand-mark">B</span><span><strong>Bermo</strong><small>Library</small></span></a>
+            <div class="auth-art-copy">
+                <p class="eyebrow">A PLACE TO FOCUS</p>
+                <h1>Make room for your best work.</h1>
+                <p>One dependable study routine, supported by a space that is ready when you are.</p>
+            </div>
+            <div class="auth-art-shapes"><i></i><i></i><i></i><span>Quiet minds.<br>Steady progress.</span></div>
+        </section>
+        <section class="auth-form-panel">
+            <div class="auth-form-wrap">
+                <a class="back-home" href="{% url 'home' %}">← Back to home</a>
+                <div class="auth-heading"><p class="eyebrow">MEMBER PORTAL</p><h1>Welcome back.</h1><p>Sign in to see your seat, schedule, and membership.</p></div>
+                {% if messages %}{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}{% endif %}
+                {% if error %}<div class="message error">{{ error }}</div>{% endif %}
+                <form method="post" class="auth-form">
+                    {% csrf_token %}
+                    <div class="auth-field"><label for="email">Email address</label><input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required></div>
+                    <div class="auth-field"><label for="password">Password</label><input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" required></div>
+                    <button type="submit" class="button button-primary auth-submit">Log in <span aria-hidden="true">→</span></button>
+                </form>
+                <p class="auth-switch">New to Bermo? <a href="{% url 'signup' %}">Create your account</a></p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

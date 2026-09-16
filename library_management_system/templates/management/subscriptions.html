@@ -74,29 +74,28 @@
 
             <tr>
 
-                <td>{{ subscription.student }}</td>
-
-                <td>{{ subscription.plan }}</td>
-
                 <td>
-                    {{ subscription.start_time }}
-                    -
-                    {{ subscription.end_time }}
+                    {% with allocation=subscription.current_allocations|first %}
+                    {% if allocation %}
+                        {{ allocation.start_time|time:"h:i A" }} –
+                        {{ allocation.end_time|time:"h:i A" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                    {% endwith %}
                 </td>
 
-                <td>{{ subscription.seat }}</td>
-
-                <td>{{ subscription.start_date }}</td>
-
-                <td>{{ subscription.end_date }}</td>
-
-                <td>{{ subscription.status }}</td>
-
                 <td>
+                    {% with allocation=subscription.current_allocations|first %}
+                        {% if allocation %}
+                            Seat {{ allocation.seat.seat_number }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    {% endwith %}
+                </td>
 
-                    <a href="#">View</a>
-                    |
-                    <a href="#">Edit</a>
+                    <a href="{% url 'management:student_detail' subscription.student.student_id %}">View</a>
 
                 </td>
 

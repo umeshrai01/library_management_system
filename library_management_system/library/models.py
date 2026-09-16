@@ -76,21 +76,16 @@ class SubscriptionPlan(models.Model):
 
 
 class TimeSlot(models.Model):
-
     slot_id = models.AutoField(primary_key=True)
-
     name = models.CharField(max_length=100)
-
     start_time = models.TimeField()
-
-    end_time = models.TimeField()
-
     is_active = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ["start_time", "name"]
+
     def __str__(self):
-        return (
-            self.name
-        )
+        return f"{self.name} ({self.start_time})"
 
 
 class Subscription(models.Model):

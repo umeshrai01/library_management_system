@@ -442,13 +442,7 @@
                         {% for slot in time_slots %}
 
                             <option value="{{ slot.slot_id }}">
-
-                                {{ slot.name }}
-                                —
                                 {{ slot.start_time|time:"h:i A" }}
-                                -
-                                {{ slot.end_time|time:"h:i A" }}
-
                             </option>
 
                         {% endfor %}

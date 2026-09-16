@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A calm, organized place to manage library memberships, seats, and attendance.">
+    <title>Bermo Library | A better study routine</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="public-page">
+    <header class="site-header">
+        <a class="brand" href="{% url 'home' %}" aria-label="Bermo Library home">
+            <span class="brand-mark">B</span>
+            <span><strong>Bermo</strong><small>Library</small></span>
+        </a>
+        <nav class="public-nav" aria-label="Primary navigation">
+            <a href="#experience">Experience</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="{% url 'login' %}" class="button button-ghost">Log in</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-copy">
+                <p class="eyebrow">FOCUSED SPACE · SIMPLE ROUTINE</p>
+                <h1>Your best study days start with a seat that’s ready for you.</h1>
+                <p class="hero-description">Bermo Library brings seat bookings, attendance, subscriptions, and payments into one quiet, effortless experience.</p>
+                <div class="hero-actions">
+                    <a href="{% url 'signup' %}" class="button button-primary">Create a student account <span aria-hidden="true">→</span></a>
+                    <a href="{% url 'login' %}" class="text-link">I already have an account</a>
+                </div>
+                <div class="trust-row" aria-label="Library highlights">
+                    <span><b>01</b> Dedicated seating</span>
+                    <span><b>02</b> Flexible study slots</span>
+                    <span><b>03</b> Easy check-in</span>
+                </div>
+            </div>
+            <div class="hero-visual" aria-hidden="true">
+                <div class="sun-disc"></div>
+                <div class="study-card study-card-main">
+                    <div class="study-card-top"><span class="card-dot"></span><span>Today’s focus</span><span>09:00</span></div>
+                    <div class="book-stack"><i></i><i></i><i></i><i></i></div>
+                    <p>Deep work<br><strong>in progress.</strong></p>
+                </div>
+                <div class="study-card study-card-note">
+                    <span class="mini-label">YOUR SEAT</span>
+                    <strong>Seat 14</strong>
+                    <span>Window section</span>
+                </div>
+                <div class="hero-grid-lines"></div>
+            </div>
+        </section>
+
+        <section class="feature-section" id="experience">
+            <div class="section-intro">
+                <p class="eyebrow">DESIGNED FOR MOMENTUM</p>
+                <h2>Everything you need for a more consistent study practice.</h2>
+            </div>
+            <div class="feature-grid">
+                <article class="feature-card feature-card-dark">
+                    <span class="feature-number">01</span>
+                    <h3>A seat that feels like yours</h3>
+                    <p>View your assignment, study window, and membership status in one place.</p>
+                    <span class="feature-icon">⌂</span>
+                </article>
+                <article class="feature-card">
+                    <span class="feature-number">02</span>
+                    <h3>A clear daily rhythm</h3>
+                    <p>Check in and out with a simple attendance history that keeps pace with you.</p>
+                    <span class="feature-icon">◷</span>
+                </article>
+                <article class="feature-card feature-card-accent">
+                    <span class="feature-number">03</span>
+                    <h3>Membership, without the guesswork</h3>
+                    <p>Keep fees, payments, and subscription dates easy to understand.</p>
+                    <span class="feature-icon">₹</span>
+                </article>
+            </div>
+        </section>
+
+        <section class="steps-section" id="how-it-works">
+            <div>
+                <p class="eyebrow">GET STARTED</p>
+                <h2>A small setup for a big habit.</h2>
+            </div>
+            <ol class="steps-list">
+                <li><span>1</span><div><strong>Create your account</strong><p>Tell us a little about yourself and the plan you prefer.</p></div></li>
+                <li><span>2</span><div><strong>Await approval</strong><p>The library team confirms your plan, seat, and study slot.</p></div></li>
+                <li><span>3</span><div><strong>Make every day count</strong><p>Check in, settle in, and focus on what matters.</p></div></li>
+            </ol>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a class="brand" href="{% url 'home' %}"><span class="brand-mark">B</span><span><strong>Bermo</strong><small>Library</small></span></a>
+        <span>A calmer place to do your best work.</span>
+        <a href="{% url 'login' %}">Member login →</a>
+    </footer>
+</body>
+</html>
