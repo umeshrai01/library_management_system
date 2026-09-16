@@ -1,0 +1,496 @@
+{% extends "management/base.html" %}
+
+{% block title %}Collect Payment{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>Collect Payment</h1>
+
+        <p>
+            Record a manual installment for an active subscription.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <form
+        method="POST"
+        id="payment-form"
+    >
+
+        {% csrf_token %}
+
+
+        <!-- =====================================
+             STUDENT
+             ===================================== -->
+
+        <div class="form-group">
+
+            <label for="student">
+                Student
+            </label>
+
+            <select
+                name="student"
+                id="student"
+                required
+            >
+
+                <option value="">
+                    Select student
+                </option>
+
+                {% for subscription in active_subscriptions %}
+
+                    <option
+                        value="{{ subscription.student.student_id }}"
+                        data-subscription="{{ subscription.subscription_id }}"
+                        data-plan="{{ subscription.plan.name }}"
+                        data-fee="{{ subscription.plan.fee }}"
+                        data-paid="{{ subscription.total_paid }}"
+                        data-remaining="{{ subscription.remaining_amount }}"
+                    >
+
+                        {{ subscription.student.full_name }}
+                        — {{ subscription.plan.name }}
+
+                    </option>
+
+                {% empty %}
+
+                    <option value="">
+                        No active subscriptions available
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- =====================================
+             SUBSCRIPTION
+             ===================================== -->
+
+        <div class="form-group">
+
+            <label for="subscription">
+                Subscription
+            </label>
+
+            <select
+                name="subscription"
+                id="subscription"
+                required
+            >
+
+                <option value="">
+                    Select subscription
+                </option>
+
+                {% for subscription in active_subscriptions %}
+
+                    {% if subscription.remaining_amount > 0 %}
+
+                        <option
+                            value="{{ subscription.subscription_id }}"
+                            data-student="{{ subscription.student.student_id }}"
+                            data-fee="{{ subscription.plan.fee }}"
+                            data-paid="{{ subscription.total_paid }}"
+                            data-remaining="{{ subscription.remaining_amount }}"
+                        >
+
+                            {{ subscription.student.full_name }}
+                            —
+                            {{ subscription.plan.name }}
+                            —
+                            ₹{{ subscription.remaining_amount }} remaining
+
+                        </option>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- =====================================
+             PLAN INFORMATION
+             ===================================== -->
+
+        <div class="payment-info">
+
+            <div>
+
+                <span>
+                    Plan
+                </span>
+
+                <strong id="plan-display">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Monthly Fee
+                </span>
+
+                <strong id="fee-display">
+                    ₹0.00
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Already Paid
+                </span>
+
+                <strong id="paid-display">
+                    ₹0.00
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Remaining
+                </span>
+
+                <strong id="remaining-display">
+                    ₹0.00
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================
+             AMOUNT
+             ===================================== -->
+
+        <div class="form-group">
+
+            <label for="amount">
+                Installment Amount
+            </label>
+
+            <input
+                type="number"
+                name="amount"
+                id="amount"
+                min="0.01"
+                step="0.01"
+                required
+                placeholder="Enter amount received"
+            >
+
+        </div>
+
+
+        <!-- =====================================
+             PAYMENT METHOD
+             ===================================== -->
+
+        <div class="form-group">
+
+            <label for="payment_method">
+                Payment Method
+            </label>
+
+            <select
+                name="payment_method"
+                id="payment_method"
+                required
+            >
+
+                <option value="CASH">
+                    Cash
+                </option>
+
+                <option value="UPI">
+                    UPI
+                </option>
+
+                <option value="CARD">
+                    Card
+                </option>
+
+                <option value="BANK">
+                    Bank Transfer
+                </option>
+
+                <option value="OTHER">
+                    Other
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- =====================================
+             TRANSACTION ID
+             ===================================== -->
+
+        <div class="form-group">
+
+            <label for="transaction_id">
+                Transaction ID
+            </label>
+
+            <input
+                type="text"
+                name="transaction_id"
+                id="transaction_id"
+                placeholder="Optional"
+            >
+
+        </div>
+
+
+        <!-- =====================================
+             REMARKS
+             ===================================== -->
+
+        <div class="form-group">
+
+            <label for="remarks">
+                Remarks
+            </label>
+
+            <textarea
+                name="remarks"
+                id="remarks"
+                rows="3"
+                placeholder="Optional remarks"
+            ></textarea>
+
+        </div>
+
+
+        <!-- =====================================
+             BUTTONS
+             ===================================== -->
+
+        <div>
+
+            <button
+                type="submit"
+                class="button"
+            >
+                Record Payment
+            </button>
+
+
+            <a
+                href="{% url 'management:fee_management' %}"
+                class="button"
+            >
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<script>
+
+const studentSelect =
+    document.getElementById("student");
+
+const subscriptionSelect =
+    document.getElementById("subscription");
+
+const amountInput =
+    document.getElementById("amount");
+
+const planDisplay =
+    document.getElementById("plan-display");
+
+const feeDisplay =
+    document.getElementById("fee-display");
+
+const paidDisplay =
+    document.getElementById("paid-display");
+
+const remainingDisplay =
+    document.getElementById("remaining-display");
+
+
+/* ==========================================
+   SELECT SUBSCRIPTION
+   ========================================== */
+
+function selectSubscription() {
+
+    const studentId =
+        studentSelect.value;
+
+
+    subscriptionSelect.value = "";
+
+
+    if (!studentId) {
+
+        updateInformation();
+
+        return;
+
+    }
+
+
+    const options =
+        subscriptionSelect.options;
+
+
+    for (
+        let i = 0;
+        i < options.length;
+        i++
+    ) {
+
+        if (
+            options[i].dataset.student === studentId
+        ) {
+
+            subscriptionSelect.value =
+                options[i].value;
+
+            break;
+
+        }
+
+    }
+
+
+    updateInformation();
+
+}
+
+
+/* ==========================================
+   UPDATE INFORMATION
+   ========================================== */
+
+function updateInformation() {
+
+    const selected =
+        subscriptionSelect.options[
+            subscriptionSelect.selectedIndex
+        ];
+
+
+    if (
+        !selected ||
+        !selected.value
+    ) {
+
+        planDisplay.textContent =
+            "—";
+
+        feeDisplay.textContent =
+            "₹0.00";
+
+        paidDisplay.textContent =
+            "₹0.00";
+
+        remainingDisplay.textContent =
+            "₹0.00";
+
+        return;
+
+    }
+
+
+    const fee =
+        parseFloat(
+            selected.dataset.fee
+        ) || 0;
+
+
+    const paid =
+        parseFloat(
+            selected.dataset.paid
+        ) || 0;
+
+
+    const remaining =
+        parseFloat(
+            selected.dataset.remaining
+        ) || 0;
+
+
+    const studentOption =
+        studentSelect.options[
+            studentSelect.selectedIndex
+        ];
+
+
+    planDisplay.textContent =
+        studentOption.dataset.plan || "—";
+
+
+    feeDisplay.textContent =
+        "₹" + fee.toFixed(2);
+
+
+    paidDisplay.textContent =
+        "₹" + paid.toFixed(2);
+
+
+    remainingDisplay.textContent =
+        "₹" + remaining.toFixed(2);
+
+
+    amountInput.max =
+        remaining;
+
+}
+
+
+/* ==========================================
+   EVENTS
+   ========================================== */
+
+studentSelect.addEventListener(
+    "change",
+    selectSubscription
+);
+
+subscriptionSelect.addEventListener(
+    "change",
+    updateInformation
+);
+
+
+updateInformation();
+
+</script>
+
+{% endblock %}

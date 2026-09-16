@@ -1,0 +1,195 @@
+{% extends "management/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>Admin Dashboard</h1>
+        <p>Overview of your library</p>
+    </div>
+
+    <div class="profile-icon">
+        👤
+    </div>
+
+</div>
+
+
+<!-- SUMMARY -->
+
+<div class="summary-cards">
+
+    <div class="card">
+        <h4>Total Students</h4>
+        <p>{{ total_students|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Active Students</h4>
+        <p>{{ active_students|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Expired Students</h4>
+        <p>{{ expired_students|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Total Owners</h4>
+        <p>{{ total_owners|default:"0" }}</p>
+    </div>
+
+</div>
+
+
+<!-- ATTENDANCE + COLLECTION -->
+
+<div class="dashboard-grid">
+
+    <div class="card">
+
+        <div class="section-header">
+            <h3>Today's Attendance</h3>
+            <a href="{% url 'management:attendance' %}">View All</a>
+        </div>
+
+        <div class="schedule-item">
+
+            <h2>
+                {{ present_today|default:"0" }}
+                /
+                {{ active_students|default:"0" }}
+            </h2>
+
+            <p>Students present today</p>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Today's Collection</h3>
+
+        <p>
+            ₹{{ today_collection|default:"0" }}
+        </p>
+
+        <a href="{% url 'management:fee_management' %}">
+            View Payments
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- EXPIRING SUBSCRIPTIONS -->
+
+<div class="card">
+
+    <div class="section-header">
+
+        <h3>Subscriptions Expiring Soon</h3>
+
+        <a href="#">View All</a>
+
+    </div>
+
+    <table width="100%" cellpadding="10">
+
+        <thead>
+
+            <tr>
+                <th>Student</th>
+                <th>Plan</th>
+                <th>Seat</th>
+                <th>Expiry</th>
+                <th>Status</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for subscription in expiring_subscriptions %}
+
+            <tr>
+
+                <td>{{ subscription.student }}</td>
+
+                <td>{{ subscription.plan }}</td>
+
+                <td>{{ subscription.seat }}</td>
+
+                <td>{{ subscription.end_date }}</td>
+
+                <td>
+                    <span class="status">
+                        Expiring
+                    </span>
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="5">
+                    No subscriptions expiring soon.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- QUICK ACTIONS -->
+
+<h3>Quick Actions</h3>
+
+<div class="quick-actions">
+
+    <a href="#" class="action">
+        <br><br>
+        Manage Students
+    </a>
+
+    <a href="#" class="action">
+        <br><br>
+        Manage Owners
+    </a>
+
+    <a href="#" class="action">
+        <br><br>
+        Collect Fee
+    </a>
+
+    <a href="#" class="action">
+        <br><br>
+        Manage Seats
+    </a>
+
+    <a href="{% url 'management:attendance' %}" class="action">
+    <br><br>
+    Attendance
+    </a>
+
+    <a href="{% url 'management:reports' %}" class="action">
+        
+        <br><br>
+        Reports
+    </a>
+
+</div>
+
+{% endblock %}

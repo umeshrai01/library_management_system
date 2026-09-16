@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>My Profile</h1>
+        <p>View your library registration details.</p>
+    </div>
+
+    <div class="profile-icon">
+        👤
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Personal Information</h3>
+    </div>
+
+    <div class="profile-details">
+
+        <p>
+            <strong>Full Name:</strong>
+            {{ student.full_name }}
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            {{ student.email }}
+        </p>
+
+        <p>
+            <strong>Phone:</strong>
+            {{ student.phone }}
+        </p>
+
+        <p>
+            <strong>Address:</strong>
+
+            {% if student.address %}
+                {{ student.address }}
+            {% else %}
+                —
+            {% endif %}
+
+        </p>
+
+        <p>
+            <strong>Date of Birth:</strong>
+
+            {% if student.date_of_birth %}
+                {{ student.date_of_birth|date:"d M Y" }}
+            {% else %}
+                —
+            {% endif %}
+
+        </p>
+
+        <p>
+            <strong>Registration Date:</strong>
+            {{ student.registration_date|date:"d M Y" }}
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+
+            {{ student.get_status_display }}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Library Information</h3>
+    </div>
+
+    <div class="profile-details">
+
+        <p>
+            <strong>Preferred Plan:</strong>
+
+            {% if student.preferred_plan %}
+                {{ student.preferred_plan.name }}
+            {% else %}
+                —
+            {% endif %}
+
+        </p>
+
+
+        <p>
+            <strong>Preferred Start Time:</strong>
+
+            {% if student.preferred_time_slot %}
+                {{ student.preferred_time_slot.start_time|time:"h:i A" }}
+            {% else %}
+                —
+            {% endif %}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Documents</h3>
+    </div>
+
+    <div class="profile-details">
+
+        <p>
+            <strong>Photo:</strong>
+
+            {% if student.photo %}
+                Uploaded
+            {% else %}
+                Not Uploaded
+            {% endif %}
+
+        </p>
+
+
+        <p>
+            <strong>Aadhaar Document:</strong>
+
+            {% if student.aadhaar_document %}
+                Uploaded
+            {% else %}
+                Not Uploaded
+            {% endif %}
+
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

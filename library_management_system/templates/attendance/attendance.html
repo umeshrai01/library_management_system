@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}My Attendance{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+    <div>
+        <h1>My Attendance</h1>
+        <p>Track your library attendance and check-in history.</p>
+    </div>
+
+    <div class="profile-icon">
+        👤
+    </div>
+</div>
+
+
+<!-- =========================================================
+     TODAY'S ATTENDANCE
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Today's Attendance</h3>
+    </div>
+
+
+    {% if student.status != "APPROVED" %}
+
+        <p>
+            Attendance is available only after your registration
+            has been approved.
+        </p>
+
+
+    {% elif not current_allocation %}
+
+        <p>
+            You currently do not have an active seat allocation.
+        </p>
+
+
+    {% else %}
+
+        <div class="attendance-today">
+
+            <p>
+                <strong>Date:</strong>
+                {{ today|date:"d M Y" }}
+            </p>
+
+            <p>
+                <strong>Assigned Seat:</strong>
+                {{ current_allocation.seat.seat_number }}
+            </p>
+
+
+            {% if not today_attendance %}
+
+                <p class="status-pending">
+                    Not Checked In
+                </p>
+
+                <form
+                    method="POST"
+                    action="{% url 'attendance:check_in' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button type="submit">
+                        Check In
+                    </button>
+
+                </form>
+
+
+            {% elif today_attendance.check_in and not today_attendance.check_out %}
+
+                <p class="status-active">
+                    Present
+                </p>
+
+                <p>
+                    <strong>Check In:</strong>
+                    {{ today_attendance.check_in|time:"h:i A" }}
+                </p>
+
+                <form
+                    method="POST"
+                    action="{% url 'attendance:check_out' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button type="submit">
+                        Check Out
+                    </button>
+
+                </form>
+
+
+            {% elif today_attendance.check_in and today_attendance.check_out %}
+
+                <p class="status-active">
+                    Completed
+                </p>
+
+                <p>
+                    <strong>Check In:</strong>
+                    {{ today_attendance.check_in|time:"h:i A" }}
+                </p>
+
+                <p>
+                    <strong>Check Out:</strong>
+                    {{ today_attendance.check_out|time:"h:i A" }}
+                </p>
+
+
+            {% else %}
+
+                <p class="status-pending">
+                    Not Checked In
+                </p>
+
+                <form
+                    method="POST"
+                    action="{% url 'attendance:check_in' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button type="submit">
+                        Check In
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     ATTENDANCE HISTORY
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Attendance History</h3>
+    </div>
+
+
+    {% if attendance_history %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Seat</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for attendance in attendance_history %}
+
+                    <tr>
+
+                        <td>
+                            {{ attendance.date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            {{ attendance.seat.seat_number }}
+                        </td>
+
+                        <td>
+
+                            {% if attendance.check_in %}
+                                {{ attendance.check_in|time:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if attendance.check_out %}
+                                {{ attendance.check_out|time:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ attendance.get_status_display }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <p>
+            You don't have any attendance records yet.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

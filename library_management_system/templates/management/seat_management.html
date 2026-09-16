@@ -1,0 +1,1346 @@
+{% extends "management/base.html" %}
+
+{% block content %}
+
+<style>
+
+    .seat-page {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        margin-bottom: 6px;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: #6b7280;
+    }
+
+
+    /* ==============================
+       SUMMARY CARDS
+       ============================== */
+
+    .seat-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .seat-stat-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .seat-stat-card h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .seat-stat-card .stat-number {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+
+    /* ==============================
+       MAIN CARD
+       ============================== */
+
+    .seat-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 28px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .seat-card-header {
+        margin-bottom: 24px;
+    }
+
+    .seat-card-header h2 {
+        margin: 0 0 6px;
+        font-size: 21px;
+    }
+
+    .seat-card-header p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+
+    /* ==============================
+       FORM GRID
+       ============================== */
+
+    .seat-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+    }
+
+    .seat-form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .seat-form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .seat-form-group label {
+        margin-bottom: 7px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .seat-form-group select,
+    .seat-form-group input,
+    .seat-form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #ffffff;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .seat-form-group select:focus,
+    .seat-form-group input:focus,
+    .seat-form-group textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .seat-form-group small {
+        margin-top: 6px;
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+
+    /* ==============================
+       PAYMENT SUMMARY
+       ============================== */
+
+    .payment-summary {
+        margin-top: 25px;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f9fafb;
+    }
+
+    .payment-summary h3 {
+        margin: 0 0 16px;
+        font-size: 16px;
+    }
+
+    .payment-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .payment-summary-item {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .payment-summary-item span {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .payment-summary-item strong {
+        font-size: 19px;
+    }
+
+
+    /* ==============================
+       BUTTON
+       ============================== */
+
+    .assign-button {
+        margin-top: 24px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .assign-button:hover {
+        background: #1d4ed8;
+    }
+
+
+    /* ==============================
+       ACTIVE ALLOCATIONS
+       ============================== */
+
+    .allocation-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .allocation-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 850px;
+    }
+
+    .allocation-table th,
+    .allocation-table td {
+        padding: 13px 14px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .allocation-table th {
+        background: #f9fafb;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .allocation-table td {
+        color: #4b5563;
+    }
+
+    .allocation-table small {
+        color: #6b7280;
+    }
+
+
+    /* ==============================
+       RELEASE BUTTON
+       ============================== */
+
+    .release-button {
+        padding: 7px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #dc2626;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .release-button:hover {
+        background: #b91c1c;
+    }
+
+    /* ==============================
+   CHANGE SEAT BUTTON
+   ============================== */
+
+    .change-seat-button {
+        padding: 7px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #2563eb;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .change-seat-button:hover {
+        background: #1d4ed8;
+    }
+
+    /* ==============================
+       EMPTY STATE
+       ============================== */
+
+    .empty-state {
+        padding: 25px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+
+    /* ==============================
+       RESPONSIVE
+       ============================== */
+
+    @media (max-width: 900px) {
+
+        .seat-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .seat-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .seat-form-group.full-width {
+            grid-column: auto;
+        }
+
+        .payment-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .seat-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .seat-card {
+            padding: 18px;
+        }
+
+    }
+
+</style>
+
+
+<div class="seat-page">
+
+
+    <!-- =========================================
+         PAGE HEADER
+         ========================================= -->
+
+    <div class="page-header">
+
+        <h1>Seat Management</h1>
+
+        <p>
+            Assign seats, subscription plans and record student payments.
+        </p>
+
+    </div>
+
+
+    <!-- =========================================
+         SEAT SUMMARY
+         ========================================= -->
+
+    <div class="seat-stats">
+
+        <div class="seat-stat-card">
+
+            <h3>Total Seats</h3>
+
+            <p class="stat-number">
+                {{ seats|length }}
+            </p>
+
+        </div>
+
+
+        <div class="seat-stat-card">
+
+            <h3>Available</h3>
+
+            <p class="stat-number">
+                {{ available_seats|length }}
+            </p>
+
+        </div>
+
+
+        <div class="seat-stat-card">
+
+            <h3>Occupied</h3>
+
+            <p class="stat-number">
+                {{ occupied_seats|length }}
+            </p>
+
+        </div>
+
+
+        <div class="seat-stat-card">
+
+            <h3>Maintenance</h3>
+
+            <p class="stat-number">
+                {{ maintenance_seats|length }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         ASSIGN SEAT CARD
+         ========================================= -->
+
+    <div class="seat-card">
+
+        <div class="seat-card-header">
+
+            <h2>Assign Seat</h2>
+
+            <p>
+                Select an approved student, subscription plan,
+                seat and time slot.
+            </p>
+
+        </div>
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
+            <div class="seat-form-grid">
+
+
+                <!-- =================================
+                     STUDENT
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="student">
+                        Student
+                    </label>
+
+                    <select
+                        name="student"
+                        id="student"
+                        required
+                    >
+
+                        <option value="">
+                            Select student
+                        </option>
+
+                        {% for student in active_students %}
+
+                            <option
+                            value="{{ student.student_id }}"
+                            data-plan="{% if student.preferred_plan %}{{ student.preferred_plan.plan_id }}{% endif %}"
+                            data-start-time="{% if student.preferred_time_slot %}{{ student.preferred_time_slot.start_time|time:'H:i' }}{% endif %}"
+                        >
+
+                        {% empty %}
+
+                            <option value="">
+                                No approved students available
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================
+                     PLAN
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="plan">
+                        Subscription Plan
+                    </label>
+
+                    <select
+                        name="plan"
+                        id="plan"
+                        required
+                    >
+
+                        <option value="">
+                            Select subscription plan
+                        </option>
+
+                        {% for plan in plans %}
+
+                            <option
+                                value="{{ plan.plan_id }}"
+                                data-fee="{{ plan.fee }}"
+                                data-hours="{{ plan.hours_per_day }}"
+                            >
+                                {{ plan.name }} — ₹{{ plan.fee }}/month
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================
+                     SEAT
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="seat">
+                        Seat
+                    </label>
+
+                    <select
+                        name="seat"
+                        id="seat"
+                        required
+                    >
+
+                        <option value="">
+                            Select available seat
+                        </option>
+
+                        {% for seat in available_seats %}
+
+                            <option value="{{ seat.seat_id }}">
+
+                                Seat {{ seat.seat_number }}
+
+                            </option>
+
+                        {% empty %}
+
+                            <option value="">
+                                No seats available
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================
+                     TIME SLOT
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="time_slot">
+                        Time Slot
+                    </label>
+
+                    <select
+                        name="time_slot"
+                        id="time_slot"
+                        required
+                    >
+
+                        <option value="">
+                            Select time slot
+                        </option>
+
+                        {% regroup time_slots by start_time as start_time_groups %}
+
+                        {% for group in start_time_groups %}
+
+                            {% with slot=group.list|first %}
+
+                                <option
+                                    value="{{ slot.slot_id }}"
+                                    data-start-time="{{ slot.start_time|time:'H:i' }}"
+                                >
+                                    {{ slot.start_time|time:"h:i A" }}
+                                </option>
+
+                            {% endwith %}
+
+                        {% empty %}
+
+    <option value="">
+        No start times available
+    </option>
+
+{% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================
+                        START TIME
+                        ================================= -->
+
+                    <div class="seat-form-group">
+
+                        <label for="time_slot">
+                            Start Time
+                        </label>
+
+                        <select
+                            name="time_slot"
+                            id="time_slot"
+                            required
+                        >
+
+                            <option value="">
+                                Select start time
+                            </option>
+
+                            {% for slot in time_slots %}
+
+                                <option
+                                    value="{{ slot.slot_id }}"
+                                    data-start-time="{{ slot.start_time|time:'H:i' }}"
+                                >
+
+                                    {{ slot.start_time|time:"h:i A" }}
+
+                                </option>
+
+                            {% empty %}
+
+                                <option value="">
+                                    No start times available
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <small>
+                            Library opening time: 6:00 AM
+                        </small>
+
+                    </div>
+
+
+                    <!-- =================================
+                        CALCULATED END TIME
+                        ================================= -->
+
+                    <div class="seat-form-group">
+
+                        <label for="calculated_end_time">
+                            End Time
+                        </label>
+
+                        <input
+                            type="text"
+                            id="calculated_end_time"
+                            readonly
+                            placeholder="Select plan and start time"
+                        >
+
+                        <small>
+                            Automatically calculated from the selected plan duration.
+                        </small>
+
+                    </div>
+
+
+                <!-- =================================
+                     INSTALLMENT
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="amount_received">
+                        Amount Received
+                    </label>
+
+                    <input
+                        type="number"
+                        name="amount_received"
+                        id="amount_received"
+                        min="0"
+                        step="0.01"
+                        value="0"
+                        placeholder="Enter amount paid"
+                        required
+                    >
+
+                    <small>
+                        Enter the amount actually paid.
+                    </small>
+
+                </div>
+
+
+                <!-- =================================
+                     PAYMENT METHOD
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="payment_method">
+                        Payment Method
+                    </label>
+
+                    <select
+                        name="payment_method"
+                        id="payment_method"
+                    >
+
+                        <option value="CASH">
+                            Cash
+                        </option>
+
+                        <option value="UPI">
+                            UPI
+                        </option>
+
+                        <option value="CARD">
+                            Card
+                        </option>
+
+                        <option value="BANK">
+                            Bank Transfer
+                        </option>
+
+                        <option value="OTHER">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================
+                     TRANSACTION ID
+                     ================================= -->
+
+                <div class="seat-form-group">
+
+                    <label for="transaction_id">
+                        Transaction ID
+                    </label>
+
+                    <input
+                        type="text"
+                        name="transaction_id"
+                        id="transaction_id"
+                        placeholder="Optional"
+                    >
+
+                </div>
+
+
+                <!-- =================================
+                     REMARKS
+                     ================================= -->
+
+                <div class="seat-form-group full-width">
+
+                    <label for="remarks">
+                        Remarks
+                    </label>
+
+                    <textarea
+                        name="remarks"
+                        id="remarks"
+                        rows="3"
+                        placeholder="Optional payment remarks"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 PAYMENT SUMMARY
+                 ========================================= -->
+
+            <div class="payment-summary">
+
+                <h3>
+                    Payment Summary
+                </h3>
+
+
+                <div class="payment-summary-grid">
+
+
+                    <div class="payment-summary-item">
+
+                        <span>
+                            Monthly Plan Fee
+                        </span>
+
+                        <strong id="plan-fee">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="payment-summary-item">
+
+                        <span>
+                            Amount Received
+                        </span>
+
+                        <strong id="received-display">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="payment-summary-item">
+
+                        <span>
+                            Remaining Fee
+                        </span>
+
+                        <strong id="remaining-display">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 SUBMIT BUTTON
+                 ========================================= -->
+
+            <button
+                type="submit"
+                class="assign-button"
+            >
+
+                Assign Seat & Record Payment
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================================
+         ACTIVE SEAT ALLOCATIONS
+         ========================================= -->
+
+    <div class="seat-card">
+
+        <div class="seat-card-header">
+
+            <h2>Active Seat Allocations</h2>
+
+            <p>
+                Students currently occupying library seats.
+            </p>
+
+        </div>
+
+
+        {% if active_allocations %}
+
+            <div class="allocation-table-wrapper">
+
+                <table class="allocation-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Seat
+                            </th>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Plan
+                            </th>
+
+                            <th>
+                                Time Slot
+                            </th>
+
+                            <th>
+                                Start Date
+                            </th>
+
+                            <th>
+                                End Date
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for allocation in active_allocations %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        Seat {{ allocation.seat.seat_number }}
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ allocation.student.full_name }}
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ allocation.subscription.plan.name }}
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ allocation.subscription.time_slot.name }}
+
+                                    <br>
+
+                                    <small>
+
+                                        {{ allocation.start_time|time:"H:i" }}
+
+                                        -
+
+                                        {{ allocation.end_time|time:"H:i" }}
+
+                                    </small>
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ allocation.start_date }}
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ allocation.end_date }}
+
+                                </td>
+
+
+                    <td>
+
+                    <div style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                    ">
+
+                        <!-- Change Seat -->
+
+                        <form
+                            method="POST"
+                            action="{% url 'management:change_seat' allocation.allocation_id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <select
+                                name="new_seat"
+                                required
+                                style="
+                                    padding: 7px 8px;
+                                    border: 1px solid #d1d5db;
+                                    border-radius: 6px;
+                                    font-size: 12px;
+                                "
+                            >
+
+                                <option value="">
+                                    New Seat
+                                </option>
+
+                                {% for seat in available_seats %}
+
+                                    <option value="{{ seat.seat_id }}">
+                                        Seat {{ seat.seat_number }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            <button
+                                type="submit"
+                                class="change-seat-button"
+                                onclick="
+                                    return confirm(
+                                        'Are you sure you want to change this students seat?');
+                                "
+                            >
+                                Change Seat
+                            </button>
+
+                        </form>
+
+
+                        <!-- Release -->
+
+                        <form
+                            method="POST"
+                            action="{% url 'management:release_seat' allocation.allocation_id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="release-button"
+                                onclick="
+                                    return confirm(
+                                        'Are you sure you want to release this seat?'
+                                    );
+                                "
+                            >
+                                Release
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                No active seat allocations.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     JAVASCRIPT
+     ========================================= -->
+
+<script>
+
+    const studentSelect =
+        document.getElementById("student");
+
+    const planSelect =
+        document.getElementById("plan");
+
+    const timeSlotSelect =
+        document.getElementById("time_slot");
+    
+    const endTimeInput =
+    document.getElementById("calculated_end_time");
+
+    const amountInput =
+        document.getElementById("amount_received");
+
+    const planFeeDisplay =
+        document.getElementById("plan-fee");
+
+    const receivedDisplay =
+        document.getElementById("received-display");
+
+    const remainingDisplay =
+        document.getElementById("remaining-display");
+
+
+    /* ==========================================
+   AUTOMATIC END TIME
+   ========================================== */
+
+function updateEndTime() {
+
+    const selectedPlan =
+        planSelect.options[
+            planSelect.selectedIndex
+        ];
+
+    const selectedSlot =
+        timeSlotSelect.options[
+            timeSlotSelect.selectedIndex
+        ];
+
+    if (
+        !selectedPlan ||
+        !selectedPlan.dataset.hours ||
+        !selectedSlot ||
+        !selectedSlot.dataset.startTime
+    ) {
+
+        endTimeInput.value = "";
+
+        endTimeInput.placeholder =
+            "Select plan and start time";
+
+        return;
+    }
+
+    const hours =
+        parseInt(
+            selectedPlan.dataset.hours,
+            10
+        );
+
+    const startTime =
+        selectedSlot.dataset.startTime;
+
+    const [startHour, startMinute] =
+        startTime.split(":").map(Number);
+
+    const startDate = new Date();
+
+    startDate.setHours(
+        startHour,
+        startMinute,
+        0,
+        0
+    );
+
+    startDate.setHours(
+        startDate.getHours() + hours
+    );
+
+    let endHour =
+        startDate.getHours();
+
+    const endMinute =
+        startDate.getMinutes();
+
+    const ampm =
+        endHour >= 12 ? "PM" : "AM";
+
+    endHour =
+        endHour % 12;
+
+    if (endHour === 0) {
+        endHour = 12;
+    }
+
+    endTimeInput.value =
+        `${endHour}:${String(endMinute).padStart(2, "0")} ${ampm}`;
+    }
+
+    /* ==========================================
+       PAYMENT SUMMARY
+       ========================================== */
+
+    function updatePaymentSummary() {
+
+        const selectedPlan =
+            planSelect.options[
+                planSelect.selectedIndex
+            ];
+
+
+        if (
+            !selectedPlan ||
+            !selectedPlan.dataset.fee
+        ) {
+
+            planFeeDisplay.textContent =
+                "₹0.00";
+
+            receivedDisplay.textContent =
+                "₹0.00";
+
+            remainingDisplay.textContent =
+                "₹0.00";
+
+            return;
+
+        }
+
+
+        const fee =
+            parseFloat(
+                selectedPlan.dataset.fee
+            ) || 0;
+
+
+        const received =
+            parseFloat(
+                amountInput.value
+            ) || 0;
+
+
+        const remaining =
+            Math.max(
+                fee - received,
+                0
+            );
+
+
+        planFeeDisplay.textContent =
+            "₹" + fee.toFixed(2);
+
+
+        receivedDisplay.textContent =
+            "₹" + received.toFixed(2);
+
+
+        remainingDisplay.textContent =
+            "₹" + remaining.toFixed(2);
+
+    }
+
+
+    /* ==========================================
+       STUDENT PREFERENCE AUTO-SELECTION
+       ========================================== */
+
+    studentSelect.addEventListener(
+        "change",
+        function () {
+
+            const selectedStudent =
+                studentSelect.options[
+                    studentSelect.selectedIndex
+                ];
+
+
+            if (!selectedStudent) {
+                return;
+            }
+
+
+            const preferredPlan =
+                selectedStudent.dataset.plan;
+
+
+            const preferredSlot =
+                selectedStudent.dataset.startTime;
+
+
+            if (preferredPlan) {
+
+                planSelect.value =
+                    preferredPlan;
+
+            }
+
+
+            if (preferredStartTime) {
+
+    const options =
+        timeSlotSelect.querySelectorAll("option");
+
+    options.forEach(function (option) {
+
+        if (
+            option.dataset.startTime ===
+            preferredStartTime
+        ) {
+            option.selected = true;
+        }
+
+    });
+
+}
+
+
+            updatePaymentSummary();
+            updateEndTime();
+
+        }
+    );
+
+
+    /* ==========================================
+       PLAN CHANGE
+       ========================================== */
+
+    planSelect.addEventListener(
+        "change",
+        function () {
+            updatePaymentSummary();
+            updateEndTime();
+        }
+    );
+
+
+    /* ==========================================
+       AMOUNT CHANGE
+       ========================================== */
+
+    amountInput.addEventListener(
+        "input",
+        updatePaymentSummary
+    );
+
+
+    /* ==========================================
+       INITIAL LOAD
+       ========================================== */
+
+    updatePaymentSummary();
+
+</script>
+
+{% endblock %}

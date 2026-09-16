@@ -1,20 +1,23 @@
-
 {% extends "base.html" %}
 
-{% block title %}
-Student Dashboard
-{% endblock %}
-
-{% load static %}
-
+{% block title %}Student Dashboard{% endblock %}
 
 {% block content %}
 
 <div class="dashboard-header">
 
     <div>
-        <h1>Welcome, Rahul!</h1>
-        <p>Good to see you back. Keep learning!</p>
+        <h1>Welcome, {{ student.full_name }}!</h1>
+
+        {% if student.status == "APPROVED" %}
+            <p>Good to see you back. Keep learning!</p>
+        {% elif student.status == "PENDING" %}
+            <p>Your registration is waiting for approval.</p>
+        {% elif student.status == "REJECTED" %}
+            <p>Your registration has been rejected.</p>
+        {% elif student.status == "UNREGISTERED" %}
+            <p>Your library registration is currently inactive.</p>
+        {% endif %}
     </div>
 
     <div class="profile-icon">
@@ -24,65 +27,443 @@ Student Dashboard
 </div>
 
 
-<!-- Summary Cards -->
+<!-- =========================================================
+     PENDING APPROVAL MESSAGE
+========================================================= -->
+
+{% if student.status == "PENDING" %}
+
+<div class="card">
+    <h3>Registration Pending</h3>
+
+    <p>
+        Your registration has been submitted successfully.
+        Please wait for the library owner/admin to approve your
+        registration and assign your seat.
+    </p>
+
+    {% if student.preferred_plan %}
+        <p>
+            <strong>Requested Plan:</strong>
+            {{ student.preferred_plan.name }}
+        </p>
+    {% endif %}
+
+    {% if student.preferred_time_slot %}
+        <p>
+            <strong>Preferred Start Time:</strong>
+            {{ student.preferred_time_slot.start_time|time:"h:i A" }}
+        </p>
+    {% endif %}
+</div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     REJECTED MESSAGE
+========================================================= -->
+
+{% if student.status == "REJECTED" %}
+
+<div class="card">
+    <h3>Registration Rejected</h3>
+
+    <p>
+        Your registration was not approved by the library.
+    </p>
+
+    {% if student.rejection_reason %}
+        <p>
+            <strong>Reason:</strong>
+            {{ student.rejection_reason }}
+        </p>
+    {% endif %}
+</div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     UNREGISTERED MESSAGE
+========================================================= -->
+
+{% if student.status == "UNREGISTERED" %}
+
+<div class="card">
+    <h3>Registration Inactive</h3>
+
+    <p>
+        Your library registration is currently inactive.
+        Your previous subscription and attendance history has
+        been preserved.
+    </p>
+</div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     SUMMARY CARDS
+========================================================= -->
+
+{% if student.status == "APPROVED" %}
 
 <div class="summary-cards">
 
+    <!-- TODAY'S ATTENDANCE -->
+
     <div class="card">
+
         <h4>Today's Status</h4>
-        <p class="status">Not Marked</p>
+
+        {% if today_attendance %}
+
+            {% if today_attendance.check_out %}
+
+                <p class="status-active">
+                    Completed
+                </p>
+
+            {% elif today_attendance.check_in %}
+
+                <p class="status-active">
+                    Present
+                </p>
+
+            {% elif today_attendance.status == "ABSENT" %}
+
+                <p class="status-pending">
+                    Absent
+                </p>
+
+            {% else %}
+
+                <p class="status-pending">
+                    Not Marked
+                </p>
+
+            {% endif %}
+
+        {% else %}
+
+            <p class="status-pending">
+                Not Marked
+            </p>
+
+        {% endif %}
+
     </div>
 
+
+    <!-- MY SEAT -->
+
     <div class="card">
+
         <h4>My Seat</h4>
-        <p>A-12</p>
+
+        {% if current_allocation %}
+
+            <p>
+                {{ current_allocation.seat.seat_number }}
+            </p>
+
+        {% else %}
+
+            <p>
+                Not Assigned
+            </p>
+
+        {% endif %}
+
     </div>
 
+
+    <!-- PLAN -->
+
     <div class="card">
+
         <h4>Plan</h4>
-        <p>8 Hours</p>
+
+        {% if current_subscription %}
+
+            <p>
+                {{ current_subscription.plan.name }}
+            </p>
+
+        {% else %}
+
+            <p>
+                Not Active
+            </p>
+
+        {% endif %}
+
     </div>
 
+
+    <!-- VALID TILL -->
+
     <div class="card">
+
         <h4>Valid Till</h4>
-        <p>25 Oct 2026</p>
+
+        {% if current_subscription %}
+
+            <p>
+                {{ current_subscription.end_date|date:"d M Y" }}
+            </p>
+
+        {% else %}
+
+            <p>—</p>
+
+        {% endif %}
+
     </div>
 
 </div>
 
 
-<!-- Lower section -->
+<!-- =========================================================
+     MAIN DASHBOARD GRID
+========================================================= -->
 
 <div class="dashboard-grid">
+
+
+    <!-- TODAY'S SCHEDULE -->
 
     <div class="card schedule">
 
         <div class="section-header">
             <h3>Today's Schedule</h3>
-            <a href="#">View All</a>
         </div>
 
-        <div class="schedule-item">
-            <span>◉</span>
-            <strong>9:00 AM – 5:00 PM</strong>
-            <span>(8 Hours)</span>
-        </div>
+        {% if current_allocation %}
+
+            <div class="schedule-item">
+
+                <span>◉</span>
+
+                <strong>
+
+                    {{ current_allocation.start_time|time:"h:i A" }}
+
+                    –
+
+                    {{ current_allocation.end_time|time:"h:i A" }}
+
+                </strong>
+
+                <span>
+
+                    ({{ current_subscription.plan.hours_per_day }}
+                    Hours)
+
+                </span>
+
+            </div>
+
+        {% elif current_subscription %}
+
+            <div class="schedule-item">
+
+                <span>◉</span>
+
+                <strong>
+
+                    {{ current_subscription.time_slot.start_time|time:"h:i A" }}
+
+                </strong>
+
+                <span>
+
+                    ({{ current_subscription.plan.hours_per_day }}
+                    Hours)
+
+                </span>
+
+            </div>
+
+        {% else %}
+
+            <p>
+                No active schedule.
+            </p>
+
+        {% endif %}
 
     </div>
 
 
-    <div class="card quote">
+    <!-- FEE STATUS -->
 
-        <p>
-            "Discipline today builds a better tomorrow."
-        </p>
+    <div class="card">
+
+        <div class="section-header">
+            <h3>Fee Status</h3>
+        </div>
+
+        {% if current_subscription %}
+
+            <p>
+                <strong>Monthly Fee:</strong>
+                ₹{{ current_subscription.plan.fee }}
+            </p>
+
+            <p>
+                <strong>Total Paid:</strong>
+                ₹{{ total_paid }}
+            </p>
+
+            <p>
+                <strong>Remaining:</strong>
+                ₹{{ remaining_fee }}
+            </p>
+
+        {% else %}
+
+            <p>
+                No active subscription.
+            </p>
+
+        {% endif %}
 
     </div>
 
 </div>
 
 
-<!-- Quick Actions -->
+<!-- =========================================================
+     RECENT PAYMENTS
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Recent Payments</h3>
+    </div>
+
+    {% if recent_payments %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Plan</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for payment in recent_payments %}
+
+                    <tr>
+
+                        <td>
+                            {{ payment.payment_date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            {{ payment.subscription.plan.name }}
+                        </td>
+
+                        <td>
+                            ₹{{ payment.amount }}
+                        </td>
+
+                        <td>
+                            {{ payment.get_payment_method_display }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            No payment records found.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     CURRENT SUBSCRIPTION
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Current Subscription</h3>
+    </div>
+
+    {% if current_subscription %}
+
+        <div class="subscription-details">
+
+            <p>
+                <strong>Plan:</strong>
+                {{ current_subscription.plan.name }}
+            </p>
+
+            <p>
+                <strong>Hours per Day:</strong>
+                {{ current_subscription.plan.hours_per_day }}
+            </p>
+
+            <p>
+                <strong>Start Date:</strong>
+                {{ current_subscription.start_date|date:"d M Y" }}
+            </p>
+
+            <p>
+                <strong>Valid Till:</strong>
+                {{ current_subscription.end_date|date:"d M Y" }}
+            </p>
+
+            {% if current_allocation %}
+
+                <p>
+                    <strong>Seat:</strong>
+                    {{ current_allocation.seat.seat_number }}
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    {% else %}
+
+        <p>
+            You do not have an active subscription.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     QUICK ACTIONS
+========================================================= -->
 
 <div class="card">
 
@@ -90,22 +471,26 @@ Student Dashboard
 
     <div class="quick-actions">
 
-        <a href="#" class="action">
-            
+        <a href="{% url 'attendance:page' %}" class="action">
             <span>Mark Attendance</span>
         </a>
 
         <a href="#" class="action">
-            
             <span>View Fee Details</span>
         </a>
 
-        <a href="#" class="action">
+        <a href="{% url 'students_documents' %}" class="action">
             <span>Upload Documents</span>
+        </a>
+
+        <a href="{% url 'students_profile' %}" class="action">
+            <span>View Profile</span>
         </a>
 
     </div>
 
 </div>
+
+{% endif %}
 
 {% endblock %}

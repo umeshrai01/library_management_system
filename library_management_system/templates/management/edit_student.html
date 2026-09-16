@@ -1,0 +1,369 @@
+{% extends "management/base.html" %}
+
+{% block title %}
+    Edit Student | Library Management System
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>Edit Student</h1>
+
+        <p>
+            Update information for {{ student.full_name }}.
+        </p>
+
+    </div>
+
+    <div>
+
+        <a
+            href="{% url 'management:student_detail' student.student_id %}"
+            class="button"
+        >
+            ← Back
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- Student Form -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Personal Information</h2>
+
+    <br>
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        ">
+
+
+            <!-- Full Name -->
+
+            <div>
+
+                <label>
+                    <strong>Full Name</strong>
+                </label>
+
+                <br><br>
+
+                <input
+                    type="text"
+                    name="full_name"
+                    value="{{ student.full_name }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Email -->
+
+            <div>
+
+                <label>
+                    <strong>Email</strong>
+                </label>
+
+                <br><br>
+
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ student.email }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Phone -->
+
+            <div>
+
+                <label>
+                    <strong>Phone</strong>
+                </label>
+
+                <br><br>
+
+                <input
+                    type="text"
+                    name="phone"
+                    value="{{ student.phone }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Date of Birth -->
+
+            <div>
+
+                <label>
+                    <strong>Date of Birth</strong>
+                </label>
+
+                <br><br>
+
+                <input
+                    type="date"
+                    name="date_of_birth"
+                    value="{{ student.date_of_birth|date:'Y-m-d' }}"
+                >
+
+            </div>
+
+
+            <!-- Address -->
+
+            <div style="grid-column: 1 / -1;">
+
+                <label>
+                    <strong>Address</strong>
+                </label>
+
+                <br><br>
+
+                <textarea
+                    name="address"
+                    rows="4"
+                >{{ student.address }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <br>
+        <hr>
+        <br>
+
+
+        <!-- ========================= -->
+        <!-- Preferences -->
+        <!-- ========================= -->
+
+        <h2>Subscription Preferences</h2>
+
+        <br>
+
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        ">
+
+
+            <!-- Plan -->
+
+            <div>
+
+                <label>
+                    <strong>Preferred Plan</strong>
+                </label>
+
+                <br><br>
+
+                <select name="preferred_plan">
+
+                    <option value="">
+                        Select Plan
+                    </option>
+
+                    {% for plan in plans %}
+
+                        <option
+                            value="{{ plan.plan_id }}"
+                            {% if student.preferred_plan and student.preferred_plan.plan_id == plan.plan_id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ plan.name }}
+                            - {{ plan.hours_per_day }} Hours
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Time Slot -->
+
+            <div>
+
+                <label>
+                    <strong>Preferred Time Slot</strong>
+                </label>
+
+                <br><br>
+
+                <select name="preferred_time_slot">
+
+                    <option value="">
+                        Select Time Slot
+                    </option>
+
+                    {% for slot in time_slots %}
+
+                        <option
+                            value="{{ slot.slot_id }}"
+                            {% if student.preferred_time_slot and student.preferred_time_slot.slot_id == slot.slot_id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ slot.name }}
+                            -
+                            {{ slot.start_time|time:"h:i A" }}
+                            to
+                            {{ slot.end_time|time:"h:i A" }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <br>
+        <hr>
+        <br>
+
+
+        <!-- ========================= -->
+        <!-- Documents -->
+        <!-- ========================= -->
+
+        <h2>Documents</h2>
+
+        <br>
+
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        ">
+
+
+            <!-- Photo -->
+
+            <div>
+
+                <label>
+                    <strong>Student Photo</strong>
+                </label>
+
+                <br><br>
+
+                {% if student.photo %}
+
+                    <img
+                        src="{{ student.photo.url }}"
+                        alt="Current Student Photo"
+                        style="
+                            width: 100px;
+                            height: 100px;
+                            object-fit: cover;
+                            border-radius: 8px;
+                        "
+                    >
+
+                    <br><br>
+
+                {% endif %}
+
+                <input
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                >
+
+            </div>
+
+
+            <!-- Aadhaar -->
+
+            <div>
+
+                <label>
+                    <strong>Aadhaar Document</strong>
+                </label>
+
+                <br><br>
+
+                {% if student.aadhaar_document %}
+
+                    <a
+                        href="{{ student.aadhaar_document.url }}"
+                        target="_blank"
+                    >
+                        View Current Aadhaar
+                    </a>
+
+                    <br><br>
+
+                {% endif %}
+
+                <input
+                    type="file"
+                    name="aadhaar_document"
+                >
+
+            </div>
+
+        </div>
+
+
+        <br>
+        <hr>
+        <br>
+
+
+        <!-- ========================= -->
+        <!-- Submit -->
+        <!-- ========================= -->
+
+        <button type="submit">
+            Save Changes
+        </button>
+
+        &nbsp;
+
+        <a
+            href="{% url 'management:student_detail' student.student_id %}"
+        >
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

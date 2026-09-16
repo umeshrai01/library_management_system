@@ -1,0 +1,312 @@
+{% extends "management/base.html" %}
+
+{% block title %}Attendance Management{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>Attendance</h1>
+
+        <p>
+            View and manage student attendance
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ATTENDANCE SUMMARY -->
+
+<div class="summary-cards">
+
+    <div class="card">
+        <h4>Total Active Students</h4>
+        <p>{{ active_students|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Present</h4>
+        <p>{{ present_today|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Absent</h4>
+        <p>{{ absent_today|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Currently Inside</h4>
+        <p>{{ currently_inside|default:"0" }}</p>
+    </div>
+
+</div>
+
+
+<!-- ATTENDANCE TABLE -->
+
+<div class="card">
+
+    <div class="section-header">
+
+        <div>
+            <h3>
+                Attendance
+                {% if selected_date %}
+                    - {{ selected_date|date:"d M Y" }}
+                {% endif %}
+            </h3>
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <form method="get"
+          style="
+              display: flex;
+              gap: 12px;
+              flex-wrap: wrap;
+              align-items: center;
+              margin-bottom: 20px;
+          ">
+
+        <!-- DATE -->
+
+        <div>
+            <label for="attendance-date">
+                Date
+            </label>
+
+            <input
+                type="date"
+                id="attendance-date"
+                name="date"
+                value="{{ selected_date|date:'Y-m-d' }}"
+            >
+        </div>
+
+
+        <!-- SEARCH -->
+
+        <div>
+            <label for="attendance-search">
+                Student
+            </label>
+
+            <input
+                type="text"
+                id="attendance-search"
+                name="search"
+                placeholder="Search student"
+                value="{{ search }}"
+            >
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div>
+            <label for="attendance-status">
+                Status
+            </label>
+
+            <select
+                id="attendance-status"
+                name="status"
+            >
+
+                <option value=""
+                    {% if not status_filter %}
+                        selected
+                    {% endif %}
+                >
+                    All
+                </option>
+
+                <option value="PRESENT"
+                    {% if status_filter == "PRESENT" %}
+                        selected
+                    {% endif %}
+                >
+                    Present
+                </option>
+
+                <option value="ABSENT"
+                    {% if status_filter == "ABSENT" %}
+                        selected
+                    {% endif %}
+                >
+                    Absent
+                </option>
+
+            </select>
+        </div>
+
+
+        <!-- APPLY -->
+
+        <div style="align-self: end;">
+
+            <button type="submit">
+                Apply Filters
+            </button>
+
+        </div>
+
+
+        <!-- CLEAR -->
+
+        <div style="align-self: end;">
+
+            <a href="{% url 'management:attendance' %}">
+                Clear
+            </a>
+
+        </div>
+
+    </form>
+
+
+    <!-- TABLE -->
+
+    <div style="overflow-x: auto;">
+
+        <table width="100%" cellpadding="12">
+
+            <thead>
+
+                <tr>
+
+                    <th>Student</th>
+
+                    <th>Seat</th>
+
+                    <th>Entry</th>
+
+                    <th>Exit</th>
+
+                    <th>Total Hours</th>
+
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for row in attendances %}
+
+                    {% with attendance=row.attendance %}
+
+                    <tr>
+
+                        <!-- STUDENT -->
+
+                        <td>
+                            {{ attendance.student.full_name }}
+                        </td>
+
+
+                        <!-- SEAT -->
+
+                        <td>
+                            {% if attendance.seat %}
+                                {{ attendance.seat.seat_number }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+
+                        <!-- ENTRY -->
+
+                        <td>
+                            {% if attendance.check_in %}
+                                {{ attendance.check_in|time:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+
+                        <!-- EXIT -->
+
+                        <td>
+                            {% if attendance.check_out %}
+                                {{ attendance.check_out|time:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+
+                        <!-- TOTAL HOURS -->
+
+                        <td>
+
+                            {% if row.total_hours %}
+                                {{ row.total_hours }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if attendance.status == "PRESENT" %}
+
+                                <span>
+                                    Present
+                                </span>
+
+                            {% elif attendance.status == "ABSENT" %}
+
+                                <span>
+                                    Absent
+                                </span>
+
+                            {% else %}
+
+                                {{ attendance.status }}
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endwith %}
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="6"
+                            style="text-align: center; padding: 30px;">
+
+                            No attendance records found.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

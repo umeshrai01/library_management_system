@@ -1,0 +1,123 @@
+{% extends "management/base.html" %}
+
+{% block title %}Subscriptions{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>Subscriptions</h1>
+
+        <p>
+            Manage student subscriptions and plans
+        </p>
+
+    </div>
+
+    <a href="#" class="action">
+        + New Subscription
+    </a>
+
+</div>
+
+
+<div class="summary-cards">
+
+    <div class="card">
+        <h4>Active</h4>
+        <p>{{ active_subscriptions|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Expiring Soon</h4>
+        <p>{{ expiring|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Expired</h4>
+        <p>{{ expired|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <h4>Installments</h4>
+        <p>{{ installment_count|default:"0" }}</p>
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <table width="100%" cellpadding="12">
+
+        <thead>
+
+            <tr>
+                <th>Student</th>
+                <th>Plan</th>
+                <th>Timing</th>
+                <th>Seat</th>
+                <th>Start</th>
+                <th>Valid Till</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for subscription in subscriptions %}
+
+            <tr>
+
+                <td>{{ subscription.student }}</td>
+
+                <td>{{ subscription.plan }}</td>
+
+                <td>
+                    {{ subscription.start_time }}
+                    -
+                    {{ subscription.end_time }}
+                </td>
+
+                <td>{{ subscription.seat }}</td>
+
+                <td>{{ subscription.start_date }}</td>
+
+                <td>{{ subscription.end_date }}</td>
+
+                <td>{{ subscription.status }}</td>
+
+                <td>
+
+                    <a href="#">View</a>
+                    |
+                    <a href="#">Edit</a>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="8">
+                    No subscriptions found.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

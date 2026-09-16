@@ -1,0 +1,772 @@
+{% extends "management/base.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+
+<div class="page-header">
+
+    <div class="page-header-content">
+        <div class="page-title-icon">
+            S
+        </div>
+
+        <div>
+            <h1>Students</h1>
+            <p>Manage all registered students.</p>
+        </div>
+    </div>
+
+    <a
+        href="{% url 'management:add_student' %}"
+        class="button"
+    >
+        <span>+</span>
+        Add Student
+    </a>
+
+</div>
+
+
+<!-- FILTERS -->
+
+<div class="card students-filter-card">
+
+    <form method="get" class="students-filter-form">
+
+        <!-- SEARCH -->
+
+        <div class="filter-field search-field">
+
+            <label for="search">
+                Search students
+            </label>
+
+            <div class="input-with-icon">
+
+                <span class="input-icon">
+                    ⌕
+                </span>
+
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    placeholder="Name, email or phone"
+                    value="{{ search_query }}"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="filter-field">
+
+            <label for="status">
+                Status
+            </label>
+
+            <select id="status" name="status">
+
+                <option value="">
+                    All Statuses
+                </option>
+
+                <option
+                    value="PENDING"
+                    {% if status_filter == "PENDING" %}selected{% endif %}
+                >
+                    Pending
+                </option>
+
+                <option
+                    value="APPROVED"
+                    {% if status_filter == "APPROVED" %}selected{% endif %}
+                >
+                    Approved
+                </option>
+
+                <option
+                    value="REJECTED"
+                    {% if status_filter == "REJECTED" %}selected{% endif %}
+                >
+                    Rejected
+                </option>
+
+                <option
+                    value="UNREGISTERED"
+                    {% if status_filter == "UNREGISTERED" %}selected{% endif %}
+                >
+                    Unregistered
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="filter-actions">
+
+            <button
+                type="submit"
+                class="button"
+            >
+                Search
+            </button>
+
+            <a
+                href="{% url 'management:students' %}"
+                class="button secondary"
+            >
+                Clear
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- STUDENT LIST -->
+
+<div class="card students-list-card">
+
+    <div class="list-header">
+
+        <div>
+
+            <h2>Student List</h2>
+
+            <p>
+                {{ students|length }}
+                student{{ students|length|pluralize }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if students %}
+
+
+    <!-- =====================================================
+         DESKTOP TABLE
+         ===================================================== -->
+
+    <div class="students-table-wrapper">
+
+        <table class="students-table">
+
+            <thead>
+
+                <tr>
+
+                    <th class="col-id">
+                        ID
+                    </th>
+
+                    <th class="col-student">
+                        Student
+                    </th>
+
+                    <th>
+                        Phone
+                    </th>
+
+                    <th>
+                        Plan
+                    </th>
+
+                    <th>
+                        Time Slot
+                    </th>
+
+                    <th>
+                        Seat
+                    </th>
+
+                    <th>
+                        Valid Till
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th class="col-actions">
+                        Actions
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for student in students %}
+
+                    {% with subscription=student.subscriptions.all|first %}
+                    {% with allocation=student.seat_allocations.all|first %}
+
+                    <tr>
+
+                        <!-- ID -->
+
+                        <td class="student-id">
+                            #{{ student.student_id }}
+                        </td>
+
+
+                        <!-- STUDENT -->
+
+                        <td>
+
+                            <div class="student-cell">
+
+                                <div class="student-avatar">
+                                    {{ student.full_name|first|upper }}
+                                </div>
+
+                                <div class="student-info">
+
+                                    <strong>
+                                        {{ student.full_name }}
+                                    </strong>
+
+                                    <span>
+                                        {{ student.email }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- PHONE -->
+
+                        <td>
+                            {{ student.phone }}
+                        </td>
+
+
+                        <!-- PLAN -->
+
+                        <td>
+
+                            {% if subscription %}
+
+                                {{ subscription.plan.name }}
+
+                            {% elif student.preferred_plan %}
+
+                                {{ student.preferred_plan.name }}
+
+                            {% else %}
+
+                                <span class="muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- TIME SLOT -->
+
+                        <td>
+
+                            {% if subscription and subscription.time_slot %}
+
+                                {{ subscription.time_slot.name }}
+
+                            {% elif student.preferred_time_slot %}
+
+                                {{ student.preferred_time_slot.name }}
+
+                            {% else %}
+
+                                <span class="muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- SEAT -->
+
+                        <td>
+
+                            {% if allocation and allocation.status == "ACTIVE" %}
+
+                                <span class="seat-label">
+                                    {{ allocation.seat.seat_number }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- VALID TILL -->
+
+                        <td>
+
+                            {% if subscription %}
+
+                                {{ subscription.end_date|date:"d M Y" }}
+
+                            {% else %}
+
+                                <span class="muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if student.status == "PENDING" %}
+
+                                <span class="status status-pending">
+                                    Pending
+                                </span>
+
+                            {% elif student.status == "APPROVED" %}
+
+                                <span class="status status-approved">
+                                    Approved
+                                </span>
+
+                            {% elif student.status == "REJECTED" %}
+
+                                <span class="status status-rejected">
+                                    Rejected
+                                </span>
+
+                            {% elif student.status == "UNREGISTERED" %}
+
+                                <span class="status status-unregistered">
+                                    Unregistered
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACTIONS -->
+
+                        <td>
+
+                            <div class="student-actions">
+
+                                <a
+                                    href="{% url 'management:student_detail' student.student_id %}"
+                                    class="button small"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="{% url 'management:edit_student' student.student_id %}"
+                                    class="button small secondary"
+                                >
+                                    Edit
+                                </a>
+
+
+                                {% if student.status == "PENDING" %}
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'management:approve_student' student.student_id %}"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="button small success-button"
+                                            onclick="return confirm('Approve {{ student.full_name }}?');"
+                                        >
+                                            Approve
+                                        </button>
+
+                                    </form>
+
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'management:reject_student' student.student_id %}"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="button small danger"
+                                            onclick="return confirm('Reject {{ student.full_name }}?');"
+                                        >
+                                            Reject
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+
+                                {% if student.status == "APPROVED" %}
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'management:unregister_student' student.student_id %}"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="button small danger"
+                                            onclick="return confirm('Are you sure you want to unregister {{ student.full_name }}?');"
+                                        >
+                                            Unregister
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endwith %}
+                    {% endwith %}
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         MOBILE STUDENT CARDS
+         ===================================================== -->
+
+    <div class="students-mobile-list">
+
+        {% for student in students %}
+
+            {% with subscription=student.subscriptions.all|first %}
+            {% with allocation=student.seat_allocations.all|first %}
+
+            <div class="student-mobile-card">
+
+                <!-- CARD HEADER -->
+
+                <div class="student-mobile-header">
+
+                    <div class="student-cell">
+
+                        <div class="student-avatar">
+                            {{ student.full_name|first|upper }}
+                        </div>
+
+                        <div class="student-info">
+
+                            <strong>
+                                {{ student.full_name }}
+                            </strong>
+
+                            <span>
+                                {{ student.email }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="student-mobile-id">
+                        #{{ student.student_id }}
+                    </span>
+
+                </div>
+
+
+                <!-- DETAILS -->
+
+                <div class="student-mobile-details">
+
+                    <div>
+                        <span>Phone</span>
+                        <strong>
+                            {{ student.phone }}
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>Plan</span>
+                        <strong>
+
+                            {% if subscription %}
+                                {{ subscription.plan.name }}
+                            {% elif student.preferred_plan %}
+                                {{ student.preferred_plan.name }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>Time Slot</span>
+                        <strong>
+
+                            {% if subscription and subscription.time_slot %}
+                                {{ subscription.time_slot.name }}
+                            {% elif student.preferred_time_slot %}
+                                {{ student.preferred_time_slot.name }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>Seat</span>
+                        <strong>
+
+                            {% if allocation and allocation.status == "ACTIVE" %}
+                                {{ allocation.seat.seat_number }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>Valid Till</span>
+                        <strong>
+
+                            {% if subscription %}
+                                {{ subscription.end_date|date:"d M Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>Status</span>
+
+                        {% if student.status == "PENDING" %}
+
+                            <span class="status status-pending">
+                                Pending
+                            </span>
+
+                        {% elif student.status == "APPROVED" %}
+
+                            <span class="status status-approved">
+                                Approved
+                            </span>
+
+                        {% elif student.status == "REJECTED" %}
+
+                            <span class="status status-rejected">
+                                Rejected
+                            </span>
+
+                        {% elif student.status == "UNREGISTERED" %}
+
+                            <span class="status status-unregistered">
+                                Unregistered
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- MOBILE ACTIONS -->
+
+                <div class="student-mobile-actions">
+
+                    <a
+                        href="{% url 'management:student_detail' student.student_id %}"
+                        class="button small"
+                    >
+                        View
+                    </a>
+
+                    <a
+                        href="{% url 'management:edit_student' student.student_id %}"
+                        class="button small secondary"
+                    >
+                        Edit
+                    </a>
+
+
+                    {% if student.status == "PENDING" %}
+
+                        <form
+                            method="post"
+                            action="{% url 'management:approve_student' student.student_id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="button small success-button"
+                                onclick="return confirm('Approve {{ student.full_name }}?');"
+                            >
+                                Approve
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'management:reject_student' student.student_id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="button small danger"
+                                onclick="return confirm('Reject {{ student.full_name }}?');"
+                            >
+                                Reject
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+
+                    {% if student.status == "APPROVED" %}
+
+                        <form
+                            method="post"
+                            action="{% url 'management:unregister_student' student.student_id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="button small danger"
+                                onclick="return confirm('Are you sure you want to unregister {{ student.full_name }}?');"
+                            >
+                                Unregister
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endwith %}
+            {% endwith %}
+
+        {% endfor %}
+
+    </div>
+
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-state-icon">
+                ♙
+            </div>
+
+            <h3>
+                No students found
+            </h3>
+
+            {% if search_query or status_filter %}
+
+                <p>
+                    Try changing your search or status filter.
+                </p>
+
+                <a
+                    href="{% url 'management:students' %}"
+                    class="button secondary"
+                >
+                    Clear Filters
+                </a>
+
+            {% else %}
+
+                <p>
+                    No students have registered yet.
+                </p>
+
+                <a
+                    href="{% url 'management:add_student' %}"
+                    class="button"
+                >
+                    + Add Student
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

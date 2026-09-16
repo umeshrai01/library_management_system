@@ -1,0 +1,500 @@
+{% extends "management/base.html" %}
+
+{% block content %}
+
+<style>
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        gap: 15px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+    }
+
+    .page-header p {
+        margin: 5px 0 0;
+        color: #777;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        max-width: 1000px;
+    }
+
+    .section-title {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 11px 12px;
+        border: 1px solid #d5d5d5;
+        border-radius: 7px;
+        font-size: 14px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .help-text {
+        margin-top: 5px;
+        color: #777;
+        font-size: 12px;
+    }
+
+    .required {
+        color: #d00;
+    }
+
+    .button-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .button {
+        display: inline-block;
+        padding: 11px 20px;
+        border-radius: 7px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .primary-button {
+        background: #2563eb;
+        color: white;
+    }
+
+    .secondary-button {
+        background: #eee;
+        color: #333;
+    }
+
+    @media (max-width: 700px) {
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full-width {
+            grid-column: auto;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .button-row {
+            flex-direction: column;
+        }
+
+        .button {
+            text-align: center;
+        }
+    }
+
+</style>
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>Add Student</h1>
+
+        <p>
+            Create a new student account from the management panel.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'management:students' %}"
+        class="button secondary-button"
+    >
+        ← Back to Students
+    </a>
+
+</div>
+
+
+<div class="form-card">
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+
+        <!-- LOGIN INFORMATION -->
+
+        <div class="form-section">
+
+            <h2 class="section-title">
+                Login Information
+            </h2>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                    >
+
+                    <div class="help-text">
+                        This email will also be used as the student's username.
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                    >
+
+                    <div class="help-text">
+                        The student will use their email and this password
+                        to log in.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- PERSONAL INFORMATION -->
+
+        <div class="form-section">
+
+            <h2 class="section-title">
+                Personal Information
+            </h2>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="full_name">
+                        Full Name <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="phone">
+                        Phone Number <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        maxlength="15"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="date_of_birth">
+                        Date of Birth
+                    </label>
+
+                    <input
+                        type="date"
+                        id="date_of_birth"
+                        name="date_of_birth"
+                    >
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea
+                        id="address"
+                        name="address"
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- DOCUMENTS -->
+
+        <div class="form-section">
+
+            <h2 class="section-title">
+                Documents
+            </h2>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="photo">
+                        Student Photo
+                    </label>
+
+                    <input
+                        type="file"
+                        id="photo"
+                        name="photo"
+                        accept="image/*"
+                    >
+
+                    <div class="help-text">
+                        Upload a clear photo of the student.
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="aadhaar_document">
+                        Aadhaar Document
+                    </label>
+
+                    <input
+                        type="file"
+                        id="aadhaar_document"
+                        name="aadhaar_document"
+                    >
+
+                    <div class="help-text">
+                        Upload the student's Aadhaar document.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- LIBRARY PREFERENCES -->
+
+        <div class="form-section">
+
+            <h2 class="section-title">
+                Library Preferences
+            </h2>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="preferred_plan">
+                        Preferred Plan
+                    </label>
+
+                    <select
+                        id="preferred_plan"
+                        name="preferred_plan"
+                    >
+
+                        <option value="">
+                            Select Plan
+                        </option>
+
+
+                        {% for plan in plans %}
+
+                            <option value="{{ plan.plan_id }}">
+
+                                {{ plan.name }}
+                                —
+                                ₹{{ plan.fee }}
+
+                            </option>
+
+                        {% endfor %}
+
+
+                    </select>
+
+                    <div class="help-text">
+                        The selected plan will be saved as the student's
+                        preference. The actual subscription will be created
+                        when the student is approved.
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="preferred_time_slot">
+                        Preferred Time Slot
+                    </label>
+
+                    <select
+                        id="preferred_time_slot"
+                        name="preferred_time_slot"
+                    >
+
+                        <option value="">
+                            Select Time Slot
+                        </option>
+
+
+                        {% for slot in time_slots %}
+
+                            <option value="{{ slot.slot_id }}">
+
+                                {{ slot.name }}
+                                —
+                                {{ slot.start_time|time:"h:i A" }}
+                                -
+                                {{ slot.end_time|time:"h:i A" }}
+
+                            </option>
+
+                        {% endfor %}
+
+
+                    </select>
+
+                    <div class="help-text">
+                        The selected time slot will be saved as the student's
+                        preference.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- SUBMIT -->
+
+        <div class="button-row">
+
+
+            <button
+                type="submit"
+                class="button primary-button"
+            >
+                Create Student
+            </button>
+
+
+            <a
+                href="{% url 'management:students' %}"
+                class="button secondary-button"
+            >
+                Cancel
+            </a>
+
+
+        </div>
+
+
+    </form>
+
+</div>
+
+{% endblock %}

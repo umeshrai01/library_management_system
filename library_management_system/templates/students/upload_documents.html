@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}My Documents | Library Management System{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>My Documents</h1>
+        <p>Manage your photograph and Aadhaar document.</p>
+    </div>
+
+    <div class="profile-icon">
+        📄
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PHOTOGRAPH
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Photograph</h3>
+    </div>
+
+    <p>
+        Upload a clear and recent photograph.
+    </p>
+
+    <br>
+
+    {% if student.photo %}
+
+        <div>
+
+            <img
+                src="{{ student.photo.url }}"
+                alt="Student Photograph"
+                style="
+                    width: 150px;
+                    height: 150px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                    border: 1px solid #ddd;
+                "
+            >
+
+        </div>
+
+        <br>
+
+        <span class="status-active">
+            Photograph Uploaded
+        </span>
+
+        <p>
+            You can upload a new photograph below to replace
+            the current one.
+        </p>
+
+    {% else %}
+
+        <span class="status-pending">
+            Photograph Not Uploaded
+        </span>
+
+    {% endif %}
+
+
+    <br>
+    <br>
+
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+        <input
+            type="file"
+            name="photo"
+            accept="image/*"
+            required
+        >
+
+        <br>
+        <br>
+
+        <button type="submit">
+            {% if student.photo %}
+                Replace Photograph
+            {% else %}
+                Upload Photograph
+            {% endif %}
+        </button>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     AADHAAR
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Aadhaar Document</h3>
+    </div>
+
+    <p>
+        Upload a clear image or PDF of your Aadhaar document.
+    </p>
+
+    <br>
+
+
+    {% if student.aadhaar_document %}
+
+        <span class="status-active">
+            Aadhaar Document Uploaded
+        </span>
+
+        <br>
+        <br>
+
+        <a
+            href="{{ student.aadhaar_document.url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            View Current Document
+        </a>
+
+        <p>
+            You can upload a new document below to replace
+            the current one.
+        </p>
+
+    {% else %}
+
+        <span class="status-pending">
+            Aadhaar Document Not Uploaded
+        </span>
+
+    {% endif %}
+
+
+    <br>
+    <br>
+
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+        <input
+            type="file"
+            name="aadhaar_document"
+            accept="image/*,.pdf"
+            required
+        >
+
+        <br>
+        <br>
+
+        <button type="submit">
+            {% if student.aadhaar_document %}
+                Replace Aadhaar
+            {% else %}
+                Upload Aadhaar
+            {% endif %}
+        </button>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     DOCUMENT GUIDELINES
+========================================================= -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Document Guidelines</h3>
+    </div>
+
+    <ul>
+
+        <li>
+            Upload a clear and recent photograph.
+        </li>
+
+        <li>
+            Make sure the Aadhaar document is readable.
+        </li>
+
+        <li>
+            Aadhaar can be uploaded as an image or PDF.
+        </li>
+
+        <li>
+            Only upload your own documents.
+        </li>
+
+    </ul>
+
+</div>
+
+{% endblock %}

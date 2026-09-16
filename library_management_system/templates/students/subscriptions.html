@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}My Subscriptions{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>My Subscriptions</h1>
+        <p>View your current and previous library subscriptions.</p>
+    </div>
+
+    <div class="profile-icon">
+        📚
+    </div>
+
+</div>
+
+
+<!-- CURRENT SUBSCRIPTION -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Current Subscription</h3>
+    </div>
+
+    {% if current_subscription %}
+
+        <p>
+            <strong>Plan:</strong>
+            {{ current_subscription.plan.name }}
+        </p>
+
+        <p>
+            <strong>Hours Per Day:</strong>
+            {{ current_subscription.plan.hours_per_day }} Hours
+        </p>
+
+        <p>
+            <strong>Subscription Fee:</strong>
+            ₹{{ current_subscription.plan.fee }}
+        </p>
+
+        <p>
+            <strong>Start Date:</strong>
+            {{ current_subscription.start_date|date:"d M Y" }}
+        </p>
+
+        <p>
+            <strong>Valid Till:</strong>
+            {{ current_subscription.end_date|date:"d M Y" }}
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            {{ current_subscription.get_status_display }}
+        </p>
+
+    {% else %}
+
+        <p>
+            You don't have an active subscription.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- PAYMENT SUMMARY -->
+
+{% if current_subscription %}
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Payment Summary</h3>
+    </div>
+
+    <p>
+        <strong>Total Fee:</strong>
+        ₹{{ current_subscription.plan.fee }}
+    </p>
+
+    <p>
+        <strong>Total Paid:</strong>
+        ₹{{ total_paid }}
+    </p>
+
+    <p>
+        <strong>Remaining:</strong>
+        ₹{{ remaining_fee }}
+    </p>
+
+</div>
+
+
+<!-- PAYMENT HISTORY -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Payment History</h3>
+    </div>
+
+    {% if payment_history %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Transaction ID</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for payment in payment_history %}
+
+                    <tr>
+
+                        <td>
+                            {{ payment.payment_date|date:"d M Y, h:i A" }}
+                        </td>
+
+                        <td>
+                            ₹{{ payment.amount }}
+                        </td>
+
+                        <td>
+                            {{ payment.get_payment_method_display }}
+                        </td>
+
+                        <td>
+                            {% if payment.transaction_id %}
+                                {{ payment.transaction_id }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            No payments have been recorded for this subscription.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- SUBSCRIPTION HISTORY -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Subscription History</h3>
+    </div>
+
+    {% if subscription_history %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Hours</th>
+                        <th>Start Date</th>
+                        <th>Valid Till</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for subscription in subscription_history %}
+
+                    <tr>
+
+                        <td>
+                            {{ subscription.plan.name }}
+                        </td>
+
+                        <td>
+                            {{ subscription.plan.hours_per_day }} Hours
+                        </td>
+
+                        <td>
+                            {{ subscription.start_date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            {{ subscription.end_date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            {{ subscription.get_status_display }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            You don't have any subscription history yet.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

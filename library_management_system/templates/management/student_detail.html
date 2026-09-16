@@ -1,0 +1,1233 @@
+{% extends "management/base.html" %}
+
+{% block title %}
+    {{ student.full_name }} | Student Details
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>{{ student.full_name }}</h1>
+
+        <p>
+            Student ID: #{{ student.student_id }}
+        </p>
+
+    </div>
+
+    <div>
+
+        <a href="{% url 'management:edit_student' student.student_id %}" class="button">Edit Student</a>
+        &nbsp;
+
+    <a href="{% url 'management:students' %}" class="button">
+    ← Back to Students
+    </a>
+
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- Student Information -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Student Information</h2>
+
+    <br>
+
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    ">
+
+        <div>
+
+            <strong>Full Name</strong>
+
+            <p>
+                {{ student.full_name }}
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Email</strong>
+
+            <p>
+                {{ student.email }}
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Phone</strong>
+
+            <p>
+                {{ student.phone }}
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Date of Birth</strong>
+
+            <p>
+
+                {% if student.date_of_birth %}
+
+                    {{ student.date_of_birth|date:"d M Y" }}
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Registration Date</strong>
+
+            <p>
+                {{ student.registration_date|date:"d M Y" }}
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Status</strong>
+
+            <p>
+
+                {% if student.status == "APPROVED" %}
+
+                    <span class="status-active">
+                        Approved
+                    </span>
+
+                {% elif student.status == "PENDING" %}
+
+                    <span class="status-pending">
+                        Pending Approval
+                    </span>
+
+                {% elif student.status == "REJECTED" %}
+
+                    <span class="status-expired">
+                        Rejected
+                    </span>
+
+                {% elif student.status == "UNREGISTERED" %}
+
+                    <span class="status-expired">
+                        Unregistered
+                    </span>
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <div style="grid-column: 1 / -1;">
+
+            <strong>Address</strong>
+
+            <p>
+
+                {% if student.address %}
+
+                    {{ student.address }}
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Documents -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Documents</h2>
+
+    <br>
+
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    ">
+
+        <div>
+
+            <strong>Photo</strong>
+
+            <p>
+
+                {% if student.photo %}
+
+                    <img
+                        src="{{ student.photo.url }}"
+                        alt="Student Photo"
+                        style="
+                            width: 120px;
+                            height: 120px;
+                            object-fit: cover;
+                            border-radius: 8px;
+                        "
+                    >
+
+                {% else %}
+
+                    No photo uploaded.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Aadhaar Document</strong>
+
+            <p>
+
+                {% if student.aadhaar_document %}
+
+                    <a
+                        href="{{ student.aadhaar_document.url }}"
+                        target="_blank"
+                    >
+                        View Aadhaar Document
+                    </a>
+
+                {% else %}
+
+                    No Aadhaar document uploaded.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Registration Preferences -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Registration Preferences</h2>
+
+    <br>
+
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    ">
+
+        <div>
+
+            <strong>Preferred Plan</strong>
+
+            <p>
+
+                {% if student.preferred_plan %}
+
+                    {{ student.preferred_plan.name }}
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <strong>Preferred Time Slot</strong>
+
+            <p>
+
+                {% if student.preferred_time_slot %}
+
+                    {{ student.preferred_time_slot.name }}
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Current Subscription -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Current Subscription</h2>
+
+    <br>
+
+    {% if current_subscription %}
+
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        ">
+
+            <div>
+
+                <strong>Plan</strong>
+
+                <p>
+                    {{ current_subscription.plan.name }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Time Slot</strong>
+
+                <p>
+
+                    {% if current_subscription.time_slot %}
+
+                        {{ current_subscription.time_slot.name }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Start Date</strong>
+
+                <p>
+                    {{ current_subscription.start_date|date:"d M Y" }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>End Date</strong>
+
+                <p>
+                    {{ current_subscription.end_date|date:"d M Y" }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Status</strong>
+
+                <p>
+                    <span class="status-active">
+                        {{ current_subscription.status }}
+                    </span>
+                </p>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            This student does not currently have an active subscription.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Current Seat -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Current Seat</h2>
+
+    <br>
+
+    {% if current_allocation %}
+
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        ">
+
+            <div>
+
+                <strong>Seat</strong>
+
+                <p>
+                    Seat {{ current_allocation.seat.seat_number }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Time Slot</strong>
+
+                <p>
+
+                    {% if current_allocation.subscription.time_slot %}
+
+                        {{ current_allocation.subscription.time_slot.name }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Start Time</strong>
+
+                <p>
+
+                    {% if current_allocation.start_time %}
+
+                        {{ current_allocation.start_time|time:"h:i A" }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>End Time</strong>
+
+                <p>
+
+                    {% if current_allocation.end_time %}
+
+                        {{ current_allocation.end_time|time:"h:i A" }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Allocation Start</strong>
+
+                <p>
+                    {{ current_allocation.start_date|date:"d M Y" }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <strong>Allocation End</strong>
+
+                <p>
+                    {{ current_allocation.end_date|date:"d M Y" }}
+                </p>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            No seat is currently assigned to this student.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Subscription History -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Subscription History</h2>
+
+    <p>
+        Previous and current subscription records.
+    </p>
+
+    <br>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Plan</th>
+
+                <th>Time Slot</th>
+
+                <th>Start Date</th>
+
+                <th>End Date</th>
+
+                <th>Status</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for subscription in subscription_history %}
+
+            <tr>
+
+                <td>
+                    {{ subscription.plan.name }}
+                </td>
+
+                <td>
+
+                    {% if subscription.time_slot %}
+
+                        {{ subscription.time_slot.name }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ subscription.start_date|date:"d M Y" }}
+                </td>
+
+                <td>
+                    {{ subscription.end_date|date:"d M Y" }}
+                </td>
+
+                <td>
+
+                    {% if subscription.status == "ACTIVE" %}
+
+                        <span class="status-active">
+                            Active
+                        </span>
+
+                    {% elif subscription.status == "EXPIRED" %}
+
+                        <span class="status-expired">
+                            Expired
+                        </span>
+
+                    {% elif subscription.status == "CANCELLED" %}
+
+                        <span class="status-pending">
+                            Cancelled
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="5">
+                    No subscription history.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Seat Allocation History -->
+<!-- ========================= -->
+
+<div class="card">
+
+    <h2>Seat Allocation History</h2>
+
+    <p>
+        Historical seat assignments for this student.
+    </p>
+
+    <br>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Seat</th>
+
+                <th>Start Date</th>
+
+                <th>End Date</th>
+
+                <th>Start Time</th>
+
+                <th>End Time</th>
+
+                <th>Status</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for allocation in seat_history %}
+
+            <tr>
+
+                <td>
+                    Seat {{ allocation.seat.seat_number }}
+                </td>
+
+                <td>
+                    {{ allocation.start_date|date:"d M Y" }}
+                </td>
+
+                <td>
+                    {{ allocation.end_date|date:"d M Y" }}
+                </td>
+
+                <td>
+
+                    {% if allocation.start_time %}
+
+                        {{ allocation.start_time|time:"h:i A" }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if allocation.end_time %}
+
+                        {{ allocation.end_time|time:"h:i A" }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if allocation.status == "ACTIVE" %}
+
+                        <span class="status-active">
+                            Active
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-expired">
+                            Ended
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="6">
+                    No seat allocation history.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<br>
+
+
+<!-- ========================= -->
+<!-- Approval -->
+<!-- ========================= -->
+
+{% if student.status == "PENDING" %}
+
+<div class="card">
+
+    <h2>Approve & Assign Student</h2>
+
+    <p>
+        Select the actual subscription, shift, seat and payment received.
+    </p>
+
+    <br>
+
+    <form
+        method="post"
+        action="{% url 'management:approve_student' student.student_id %}"
+    >
+
+        {% csrf_token %}
+
+
+        <div class="form-grid">
+
+
+            <!-- Plan -->
+
+            <div class="form-group">
+
+                <label for="plan">
+                    Subscription Plan
+                </label>
+
+                <select
+                    name="plan"
+                    id="plan"
+                    required
+                >
+
+                    <option value="">
+                        Select Plan
+                    </option>
+
+                    {% for plan in plans %}
+
+                        <option
+                            value="{{ plan.plan_id }}"
+                            data-hours="{{ plan.hours_per_day }}"
+                            {% if student.preferred_plan_id == plan.plan_id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ plan.name }}
+                            — ₹{{ plan.fee }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+
+           <!-- Time Slot / Start Time -->
+
+    <div class="form-group">
+
+        <label for="time_slot">
+            Start Time
+        </label>
+
+        <select
+            name="time_slot"
+            id="time_slot"
+            required
+        >
+
+            <option value="">
+                Select Start Time
+            </option>
+
+            {% for slot in time_slots %}
+
+                <option
+                    value="{{ slot.slot_id }}"
+                    data-start-time="{{ slot.start_time|time:'H:i' }}"
+                    {% if student.preferred_time_slot_id == slot.slot_id %}
+                        selected
+                    {% endif %}
+                >
+
+                    {{ slot.start_time|time:"h:i A" }}
+
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <!-- Calculated End Time -->
+
+    <div class="form-group">
+
+        <label for="calculated_end_time">
+            End Time
+        </label>
+
+        <input
+            type="text"
+            id="calculated_end_time"
+            value=""
+            readonly
+            placeholder="Select plan and start time"
+        >
+
+    </div>
+
+
+            <!-- Seat -->
+
+            <div class="form-group">
+
+                <label for="seat">
+                    Seat
+                </label>
+
+                <select
+                    name="seat"
+                    id="seat"
+                    required
+                >
+
+                    <option value="">
+                        Select Available Seat
+                    </option>
+
+                    {% for seat in available_seats %}
+
+                        <option value="{{ seat.seat_id }}">
+
+                            Seat {{ seat.seat_number }}
+
+                        </option>
+
+                    {% empty %}
+
+                        <option value="">
+                            No seats available
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Start Date -->
+
+            <div class="form-group">
+
+                <label for="start_date">
+                    Start Date
+                </label>
+
+                <input
+                    type="date"
+                    name="start_date"
+                    id="start_date"
+                    value="{{ today|date:'Y-m-d' }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Amount -->
+
+            <div class="form-group">
+
+                <label for="amount_received">
+                    Amount Received
+                </label>
+
+                <input
+                    type="number"
+                    name="amount_received"
+                    id="amount_received"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    placeholder="Enter amount received"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Payment Method -->
+
+            <div class="form-group">
+
+                <label for="payment_method">
+                    Payment Method
+                </label>
+
+                <select
+                    name="payment_method"
+                    id="payment_method"
+                    required
+                >
+
+                    <option value="CASH">
+                        Cash
+                    </option>
+
+                    <option value="UPI">
+                        UPI
+                    </option>
+
+                    <option value="CARD">
+                        Card
+                    </option>
+
+                    <option value="BANK">
+                        Bank Transfer
+                    </option>
+
+                    <option value="OTHER">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Transaction ID -->
+
+            <div class="form-group">
+
+                <label for="transaction_id">
+                    Transaction ID
+                    <small>(Optional)</small>
+                </label>
+
+                <input
+                    type="text"
+                    name="transaction_id"
+                    id="transaction_id"
+                    placeholder="UPI / bank transaction ID"
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <!-- Remarks -->
+
+        <div class="form-group">
+
+            <label for="remarks">
+                Remarks
+            </label>
+
+            <textarea
+                name="remarks"
+                id="remarks"
+                rows="3"
+                placeholder="Optional payment remarks"
+            ></textarea>
+
+        </div>
+
+
+        <br>
+
+
+        <button
+            type="submit"
+            class="button"
+            onclick="
+                return confirm(
+                    'Approve this student and assign the selected seat?'
+                );
+            "
+        >
+            Approve & Assign
+        </button>
+
+
+        <button
+            type="submit"
+            formaction="{% url 'management:reject_student' student.student_id %}"
+            class="button button-danger"
+            onclick="
+                return confirm(
+                    'Are you sure you want to reject this student?'
+                );
+            "
+        >
+            Reject Student
+        </button>
+
+
+    </form>
+
+</div>
+
+{% endif %}
+
+{% if student.status == "APPROVED" %}
+
+<br>
+
+<div class="card">
+
+    <h2>Student Account Management</h2>
+
+    <p>
+        Unregister this student from the library.
+        Historical subscriptions, seat allocations and other records
+        will be preserved.
+    </p>
+
+    <br>
+
+    <form
+        method="post"
+        action="{% url 'management:unregister_student' student.student_id %}"
+    >
+
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            onclick="return confirm(
+                'Are you sure you want to unregister {{ student.full_name }}? Their current seat will be released.'
+            );"
+        >
+            Unregister Student
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const planSelect = document.getElementById("plan");
+    const timeSlotSelect = document.getElementById("time_slot");
+    const endTimeInput = document.getElementById("calculated_end_time");
+
+    function calculateEndTime() {
+
+        const selectedPlan =
+            planSelect.options[planSelect.selectedIndex];
+
+        const selectedSlot =
+            timeSlotSelect.options[timeSlotSelect.selectedIndex];
+
+        if (
+            !selectedPlan ||
+            !selectedPlan.dataset.hours ||
+            !selectedSlot ||
+            !selectedSlot.dataset.startTime
+        ) {
+            endTimeInput.value = "";
+            endTimeInput.placeholder =
+                "Select plan and start time";
+            return;
+        }
+
+        const hours = parseInt(
+            selectedPlan.dataset.hours,
+            10
+        );
+
+        const [startHour, startMinute] =
+            selectedSlot.dataset.startTime
+                .split(":")
+                .map(Number);
+
+        const startDate = new Date();
+
+        startDate.setHours(
+            startHour,
+            startMinute,
+            0,
+            0
+        );
+
+        startDate.setHours(
+            startDate.getHours() + hours
+        );
+
+        let endHour = startDate.getHours();
+        const endMinute = startDate.getMinutes();
+
+        const ampm = endHour >= 12 ? "PM" : "AM";
+
+        endHour = endHour % 12;
+
+        if (endHour === 0) {
+            endHour = 12;
+        }
+
+        endTimeInput.value =
+            `${endHour}:${String(endMinute).padStart(2, "0")} ${ampm}`;
+    }
+
+    planSelect.addEventListener(
+        "change",
+        calculateEndTime
+    );
+
+    timeSlotSelect.addEventListener(
+        "change",
+        calculateEndTime
+    );
+
+    calculateEndTime();
+
+});
+</script>
+
+
+{% endblock %}

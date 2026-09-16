@@ -1,0 +1,103 @@
+{% extends "management/base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>Settings</h1>
+
+        <p>
+            Manage library settings
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <h3>Library Information</h3>
+
+    <br>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <label>Library Name</label>
+
+        <br>
+
+        <input
+            type="text"
+            name="library_name"
+            value="{{ library.name|default:'' }}"
+        >
+
+        <br><br>
+
+
+        <label>Address</label>
+
+        <br>
+
+        <textarea
+            name="address"
+            rows="4"
+        >{{ library.address|default:'' }}</textarea>
+
+        <br><br>
+
+
+        <label>Contact Number</label>
+
+        <br>
+
+        <input
+            type="text"
+            name="phone"
+            value="{{ library.phone|default:'' }}"
+        >
+
+        <br><br>
+
+
+        <button type="submit">
+            Save Changes
+        </button>
+
+    </form>
+
+</div>
+
+
+<div class="card">
+
+    <h3>Subscription Plans</h3>
+
+    <br>
+
+    <p>
+        Configure the available library plans.
+    </p>
+
+    <ul>
+
+        <li>4 Hours</li>
+        <li>8 Hours</li>
+        <li>12 Hours</li>
+
+    </ul>
+
+    <a href="#">
+        Manage Plans
+    </a>
+
+</div>
+
+{% endblock %}

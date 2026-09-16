@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}My Seat{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>My Seat</h1>
+        <p>View your currently assigned library seat.</p>
+    </div>
+
+    <div class="profile-icon">
+        💺
+    </div>
+
+</div>
+
+
+<!-- CURRENT SEAT -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Current Seat</h3>
+    </div>
+
+    {% if current_allocation %}
+
+        <div class="profile-details">
+
+            <p>
+                <strong>Seat Number:</strong>
+                {{ current_allocation.seat.seat_number }}
+            </p>
+
+            <p>
+                <strong>Library:</strong>
+                {{ current_allocation.seat.library.name }}
+            </p>
+
+            <p>
+                <strong>Plan:</strong>
+                {{ current_allocation.subscription.plan.name }}
+            </p>
+
+            <p>
+                <strong>Hours Per Day:</strong>
+                {{ current_allocation.subscription.plan.hours_per_day }}
+                Hours
+            </p>
+
+            <p>
+                <strong>Start Time:</strong>
+
+                {% if current_allocation.start_time %}
+                    {{ current_allocation.start_time|time:"h:i A" }}
+                {% else %}
+                    —
+                {% endif %}
+
+            </p>
+
+            <p>
+                <strong>End Time:</strong>
+
+                {% if current_allocation.end_time %}
+                    {{ current_allocation.end_time|time:"h:i A" }}
+                {% else %}
+                    —
+                {% endif %}
+
+            </p>
+
+            <p>
+                <strong>Allocation Start:</strong>
+                {{ current_allocation.start_date|date:"d M Y" }}
+            </p>
+
+            <p>
+                <strong>Allocation Valid Till:</strong>
+                {{ current_allocation.end_date|date:"d M Y" }}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                {{ current_allocation.get_status_display }}
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            You currently do not have an assigned seat.
+        </p>
+
+        {% if student.status == "PENDING" %}
+
+            <p>
+                Your seat will be assigned after your registration
+                is approved.
+            </p>
+
+        {% elif student.status == "APPROVED" %}
+
+            <p>
+                Your registration is approved, but no active seat
+                allocation is currently available.
+            </p>
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+
+<!-- SEAT HISTORY -->
+
+<div class="card">
+
+    <div class="section-header">
+        <h3>Seat History</h3>
+    </div>
+
+    {% if seat_history %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Seat</th>
+                        <th>Plan</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for allocation in seat_history %}
+
+                    <tr>
+
+                        <td>
+                            {{ allocation.seat.seat_number }}
+                        </td>
+
+                        <td>
+                            {{ allocation.subscription.plan.name }}
+                        </td>
+
+                        <td>
+
+                            {% if allocation.start_time %}
+                                {{ allocation.start_time|time:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if allocation.end_time %}
+                                {{ allocation.end_time|time:"h:i A" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ allocation.start_date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            {{ allocation.end_date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            {{ allocation.get_status_display }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p>
+            You don't have any seat allocation history yet.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

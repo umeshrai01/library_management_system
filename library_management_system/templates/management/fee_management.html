@@ -1,0 +1,725 @@
+{% extends "management/base.html" %}
+
+{% block title %}Fee Management{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .dashboard-header {
+        margin-bottom: 25px;
+    }
+
+    .dashboard-header h1 {
+        margin-bottom: 5px;
+    }
+
+    .dashboard-header p {
+        margin: 0;
+        color: #777;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .summary-cards .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .summary-cards h4 {
+        margin: 0 0 10px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .summary-cards p {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .section-header h3 {
+        margin: 0 0 5px;
+    }
+
+    .section-header p {
+        margin: 0;
+        color: #777;
+    }
+
+    .button {
+        display: inline-block;
+        padding: 10px 16px;
+        border-radius: 7px;
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .button:hover {
+        opacity: 0.9;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        background: #f7f7f7;
+        font-size: 13px;
+        color: #555;
+        white-space: nowrap;
+    }
+
+    th,
+    td {
+        padding: 13px 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    td {
+        font-size: 14px;
+    }
+
+    .student-name {
+        font-weight: 600;
+    }
+
+    .amount {
+        font-weight: 600;
+    }
+
+    .remaining {
+        color: #c2410c;
+        font-weight: 700;
+    }
+
+    .paid-full {
+        color: #15803d;
+        font-weight: 700;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-pending {
+        background: #ffedd5;
+        color: #9a3412;
+    }
+
+    .status-other {
+        background: #eee;
+        color: #555;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 35px 15px;
+        color: #777;
+    }
+
+    .secondary-button {
+        background: #eee;
+        color: #333;
+    }
+
+    @media (max-width: 1000px) {
+
+        .summary-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+    }
+
+    @media (max-width: 650px) {
+
+        .summary-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .button {
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+    }
+
+</style>
+
+
+<!-- =========================================
+     HEADER
+     ========================================= -->
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1>
+            Fee Management
+        </h1>
+
+        <p>
+            Manage student payments, installments and outstanding fees.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     SUMMARY
+     ========================================= -->
+
+<div class="summary-cards">
+
+
+    <div class="card">
+
+        <h4>
+            Today's Collection
+        </h4>
+
+        <p>
+            ₹{{ today_collection|default:"0" }}
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>
+            This Month
+        </h4>
+
+        <p>
+            ₹{{ monthly_collection|default:"0" }}
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>
+            Pending Fees
+        </h4>
+
+        <p>
+            ₹{{ pending_amount|default:"0" }}
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>
+            Installments
+        </h4>
+
+        <p>
+            {{ installments|default:"0" }}
+        </p>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================
+     STUDENT FEE BALANCES
+     ========================================= -->
+
+<div class="card">
+
+
+    <div class="section-header">
+
+        <div>
+
+            <h3>
+                Student Fee Balances
+            </h3>
+
+            <p>
+                Current fee status for all active subscriptions.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'management:collect_payment' %}"
+            class="button"
+        >
+            + Collect Payment
+        </a>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Plan
+                    </th>
+
+                    <th>
+                        Subscription
+                    </th>
+
+                    <th>
+                        Plan Fee
+                    </th>
+
+                    <th>
+                        Paid
+                    </th>
+
+                    <th>
+                        Remaining
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in fee_balances %}
+
+                    <tr>
+
+
+                        <!-- STUDENT -->
+
+                        <td>
+
+                            <div class="student-name">
+                                {{ item.subscription.student.full_name }}
+                            </div>
+
+                            <div style="color:#777; font-size:12px;">
+                                {{ item.subscription.student.email }}
+                            </div>
+
+                        </td>
+
+
+                        <!-- PLAN -->
+
+                        <td>
+                            {{ item.subscription.plan.name }}
+                        </td>
+
+
+                        <!-- SUBSCRIPTION DATES -->
+
+                        <td>
+
+                            {{ item.subscription.start_date|date:"d M Y" }}
+
+                            -
+
+                            {{ item.subscription.end_date|date:"d M Y" }}
+
+                        </td>
+
+
+                        <!-- PLAN FEE -->
+
+                        <td class="amount">
+
+                            ₹{{ item.subscription.plan.fee }}
+
+                        </td>
+
+
+                        <!-- PAID -->
+
+                        <td class="amount">
+
+                            ₹{{ item.total_paid }}
+
+                        </td>
+
+
+                        <!-- REMAINING -->
+
+                        <td>
+
+                            {% if item.remaining_amount > 0 %}
+
+                                <span class="remaining">
+                                    ₹{{ item.remaining_amount }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="paid-full">
+                                    ₹0.00
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if item.remaining_amount > 0 %}
+
+                                <span class="status status-pending">
+                                    Pending
+                                </span>
+
+                            {% else %}
+
+                                <span class="status status-paid">
+                                    Fully Paid
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACTION -->
+
+                        <td>
+
+                            {% if item.remaining_amount > 0 %}
+
+                                <a
+                                    href="{% url 'management:collect_payment' %}"
+                                    class="button"
+                                >
+                                    Collect
+                                </a>
+
+                            {% else %}
+
+                                <span style="color:#777;">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            class="empty-state"
+                        >
+
+                            No active student subscriptions found.
+
+                            <br><br>
+
+                            <a
+                                href="{% url 'management:students' %}"
+                                class="button"
+                            >
+                                View Students
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     PAYMENT HISTORY
+     ========================================= -->
+
+<div class="card">
+
+
+    <div class="section-header">
+
+        <div>
+
+            <h3>
+                Payment History
+            </h3>
+
+            <p>
+                All recorded student payments.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'management:collect_payment' %}"
+            class="button"
+        >
+            + Collect Payment
+        </a>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Plan
+                    </th>
+
+                    <th>
+                        Amount
+                    </th>
+
+                    <th>
+                        Method
+                    </th>
+
+                    <th>
+                        Transaction ID
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for payment in payments %}
+
+                    <tr>
+
+
+                        <!-- DATE -->
+
+                        <td>
+
+                            {{ payment.payment_date|date:"d M Y, h:i A" }}
+
+                        </td>
+
+
+                        <!-- STUDENT -->
+
+                        <td>
+
+                            {{ payment.student.full_name }}
+
+                        </td>
+
+
+                        <!-- PLAN -->
+
+                        <td>
+
+                            {{ payment.subscription.plan.name }}
+
+                        </td>
+
+
+                        <!-- AMOUNT -->
+
+                        <td class="amount">
+
+                            ₹{{ payment.amount }}
+
+                        </td>
+
+
+                        <!-- METHOD -->
+
+                        <td>
+
+                            {{ payment.get_payment_method_display }}
+
+                        </td>
+
+
+                        <!-- TRANSACTION ID -->
+
+                        <td>
+
+                            {% if payment.transaction_id %}
+
+                                {{ payment.transaction_id }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if payment.status == "PAID" %}
+
+                                <span class="status status-paid">
+                                    {{ payment.get_status_display }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="status status-other">
+                                    {{ payment.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty-state"
+                        >
+
+                            No payments found.
+
+                            <br><br>
+
+                            <a
+                                href="{% url 'management:collect_payment' %}"
+                                class="button"
+                            >
+                                Collect First Payment
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "management/base.html" %}
+
+{% block title %}Manage Owners{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>Owners</h1>
+        <p>Manage library owners</p>
+    </div>
+
+    <a href="#" class="action">
+        + Add Owner
+    </a>
+
+</div>
+
+
+<div class="card">
+
+    <table width="100%" cellpadding="12">
+
+        <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for owner in owners %}
+
+            <tr>
+
+                <td>{{ owner.id }}</td>
+
+                <td>{{ owner.name }}</td>
+
+                <td>{{ owner.email }}</td>
+
+                <td>{{ owner.mobile }}</td>
+
+                <td>{{ owner.joined_date }}</td>
+
+                <td>{{ owner.status }}</td>
+
+                <td>
+
+                    <a href="#">View</a>
+                    |
+                    <a href="#">Edit</a>
+                    |
+                    <a href="#">Delete</a>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="7">
+                    No owners found.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

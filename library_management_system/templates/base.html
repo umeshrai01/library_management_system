@@ -1,54 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Library Management System{% endblock %}</title>
+
+    <title>
+        {% block title %}
+            Library Management System
+        {% endblock %}
+    </title>
+
     {% load static %}
-    <link rel="stylesheet" href="../static/css/main.css">
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
 </head>
+
 <body>
-    <div>
-        <aside class="sidebar">
-            <div class="logo">
-                Library
-            </div>
-        
+
+<div>
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            Bermo Library
+        </div>
+
 
         <nav>
-            <a href="{% url 'student_dashboard %'}">
+
+            <!-- HOME -->
+
+            <a
+                href="{% url 'students_dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'students_dashboard' %}active{% endif %}"
+            >
                 Home
             </a>
-            <a href="#">
+
+
+            <!-- ATTENDANCE -->
+
+            <a
+                href="{% url 'attendance:page' %}"
+                class="{% if request.resolver_match.app_name == 'attendance' %}active{% endif %}"
+            >
                 Mark Attendance
             </a>
-            <a href="#">
-                My Subscriptions
-            </a>
-            <a href="#">
-                My seat
+
+
+            <!-- SUBSCRIPTIONS -->
+
+            <a href="{% url 'students_subscriptions' %}" class="{% if request.resolver_match.url_name == 'students_subscriptions' %}active{% endif %}">
+            My Subscriptions
             </a>
 
-            <a href="#">
-                Upload Documents 
+
+            <!-- SEAT -->
+        <a href="{% url 'students_seat' %}" class="{% if request.resolver_match.url_name == 'students_seat' %}active{% endif %}">
+        My Seat
+        </a>
+
+
+            <!-- DOCUMENTS -->
+
+            <a
+                href="{% url 'students_documents' %}"
+                class="{% if request.resolver_match.url_name == 'students_documents' %}active{% endif %}"
+            >
+                Upload Documents
             </a>
-            <a href="#">
+
+
+            <!-- PROFILE -->
+
+            <a
+                href="{% url 'students_profile' %}"
+                class="{% if request.resolver_match.url_name == 'students_profile' %}active{% endif %}"
+            >
                 Profile
             </a>
+
         </nav>
 
+
+        <!-- LOGOUT -->
+
         <div class="logout">
-            <a href="#">
+
+            <a href="{% url 'logout' %}">
                 Logout
             </a>
+
         </div>
+
     </aside>
 
 
     <main class="main-content">
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
         {% block content %}
         {% endblock %}
+
     </main>
-    </div>
+
+</div>
+
 </body>
+
 </html>

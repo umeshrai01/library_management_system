@@ -1,44 +1,308 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-</head>
-<body>
-    <div>
-        <h1>Please Signup to Continue</h1>
 
-        <form>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Signup | Library Management System</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/main.css' %}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="main-content">
+
+    <div class="card">
+
+        <h1>Student Registration</h1>
+
+        <p>
+            Create your library account.
+        </p>
+
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <p class="status-pending">
+                    {{ message }}
+                </p>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
             <table>
+
+                <!-- FULL NAME -->
+
                 <tr>
-                    <td><label for="fname">Full Name:</label></td>
-                    <td><input type="text"  name="full_name" required></td>
+
+                    <td>
+                        <label for="full_name">
+                            Full Name:
+                        </label>
+                    </td>
+
+                    <td>
+                        <input
+                            type="text"
+                            id="full_name"
+                            name="full_name"
+                            required
+                        >
+                    </td>
+
                 </tr>
+
+
+                <!-- EMAIL -->
+
                 <tr>
-                    <td><label for="email">Email:</label></td>
-                    <td><input type="email" id="email" name="email" required></td>
+
+                    <td>
+                        <label for="email">
+                            Email:
+                        </label>
+                    </td>
+
+                    <td>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                        >
+                    </td>
+
                 </tr>
-                
+
+
+                <!-- PHONE -->
+
                 <tr>
-                    <td><label for="phone">Phone:</label></td>
-                    <td><input type="text" id="phone" name="phone" required></td>
+
+                    <td>
+                        <label for="phone">
+                            Phone:
+                        </label>
+                    </td>
+
+                    <td>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            required
+                        >
+                    </td>
+
                 </tr>
+
+
+                <!-- ADDRESS -->
+
                 <tr>
-                    <td><label for="address">Address:</label></td>
-                    <td><input type="text" id="address" name="address" required></td>
+
+                    <td>
+                        <label for="address">
+                            Address:
+                        </label>
+                    </td>
+
+                    <td>
+                        <textarea
+                            id="address"
+                            name="address"
+                            rows="4"
+                            required
+                        ></textarea>
+                    </td>
+
                 </tr>
+
+
+                <!-- SUBSCRIPTION PLAN -->
+
                 <tr>
-                    <td><label for="password">Password:</label></td>
-                    <td><input type="password" id="password" name="password" required></td>
+
+                    <td>
+                        <label for="preferred_plan">
+                            Subscription Plan:
+                        </label>
+                    </td>
+
+                    <td>
+
+                        <select
+                            id="preferred_plan"
+                            name="preferred_plan"
+                            required
+                        >
+
+                            <option value="">
+                                Select Plan
+                            </option>
+
+                            {% for plan in subscription_plans %}
+
+                                <option value="{{ plan.plan_id }}">
+
+                                    {{ plan.name }}
+                                    -
+                                    {{ plan.hours_per_day }} Hours/Day
+                                    -
+                                    ₹{{ plan.fee }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </td>
+
                 </tr>
+
+
+                <!-- PREFERRED TIME SLOT -->
+
                 <tr>
-                    <td><label for="confirm_password">Confirm Password:</label></td>
-                    <td><input type="password" id="confirm_password" name="confirm_password" required></td>
+
+                    <td>
+                        <label for="preferred_time_slot">
+                            Preferred Time Slot:
+                        </label>
+                    </td>
+
+                    <td>
+
+                        <select
+                            id="preferred_time_slot"
+                            name="preferred_time_slot"
+                            required
+                        >
+
+                            <option value="">
+                                Select Time Slot
+                            </option>
+
+                            {% for slot in time_slots %}
+
+                                <option value="{{ slot.slot_id }}">
+
+                                    {{ slot.name }}
+                                    -
+                                    {{ slot.start_time|time:"h:i A" }}
+                                    -
+                                    {{ slot.end_time|time:"h:i A" }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </td>
+
                 </tr>
+
+
+                <!-- PASSWORD -->
+
+                <tr>
+
+                    <td>
+                        <label for="password">
+                            Password:
+                        </label>
+                    </td>
+
+                    <td>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                        >
+
+                    </td>
+
+                </tr>
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <tr>
+
+                    <td>
+                        <label for="confirm_password">
+                            Confirm Password:
+                        </label>
+                    </td>
+
+                    <td>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            required
+                        >
+
+                    </td>
+
+                </tr>
+
             </table>
-            <input type="submit" value="Signup" ><td><a href="login.html">Existing User? Login here</a></td>
+
+
+            <br>
+
+
+            <button type="submit">
+                Register
+            </button>
+
         </form>
+
+
+        <br>
+
+
+        <p>
+            Already have an account?
+            <a href="{% url 'login' %}">
+                Login here
+            </a>
+        </p>
+
     </div>
+
+</div>
+
 </body>
+
 </html>

@@ -1,0 +1,343 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+            Library Management System
+        {% endblock %}
+    </title>
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <!-- MOBILE HEADER -->
+
+    <header class="mobile-header">
+
+        <div class="mobile-header-logo">
+            <span class="logo-mark">L</span>
+            <span>Library</span>
+        </div>
+
+        <button
+            type="button"
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open navigation"
+            aria-expanded="false"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+    </header>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="managementSidebar">
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <div class="logo-mark">
+                L
+            </div>
+
+            <div class="logo-text">
+                <strong>Library</strong>
+                <span>Management</span>
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="{% url 'management:dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+            >
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:students' %}"
+                class="{% if request.resolver_match.url_name == 'students' %}active{% endif %}"
+            >
+                <span class="nav-icon">♙</span>
+                <span>Students</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:owners' %}"
+                class="{% if request.resolver_match.url_name == 'owners' %}active{% endif %}"
+            >
+                <span class="nav-icon">♙</span>
+                <span>Owners</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:attendance' %}"
+                class="{% if request.resolver_match.url_name == 'attendance' %}active{% endif %}"
+            >
+                <span class="nav-icon">◷</span>
+                <span>Attendance</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:fee_management' %}"
+                class="{% if request.resolver_match.url_name == 'fee_management' %}active{% endif %}"
+            >
+                <span class="nav-icon">₹</span>
+                <span>Fee Management</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:seat_management' %}"
+                class="{% if request.resolver_match.url_name == 'seat_management' %}active{% endif %}"
+            >
+                <span class="nav-icon">▦</span>
+                <span>Seat Management</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:subscriptions' %}"
+                class="{% if request.resolver_match.url_name == 'subscriptions' %}active{% endif %}"
+            >
+                <span class="nav-icon">▤</span>
+                <span>Subscriptions</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:reports' %}"
+                class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
+            >
+                <span class="nav-icon">▥</span>
+                <span>Reports</span>
+            </a>
+
+
+            <a
+                href="{% url 'management:settings' %}"
+                class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}"
+            >
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <!-- LOGOUT -->
+
+        <div class="logout">
+
+            <a href="{% url 'logout' %}">
+                <span class="nav-icon">↪</span>
+                <span>Logout</span>
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- OVERLAY FOR MOBILE -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+    <!-- PAGE CONTENT -->
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+
+        <div class="topbar">
+
+            <div class="topbar-spacer"></div>
+
+            <div class="topbar-user">
+
+                <div class="topbar-avatar">
+                    {{ request.user.username|first|upper }}
+                </div>
+
+                <div class="topbar-user-info">
+
+                    <strong>
+                        {{ request.user.username }}
+                    </strong>
+
+                    <span>
+                        {% if request.user.role %}
+                            {{ request.user.get_role_display }}
+                        {% else %}
+                            Administrator
+                        {% endif %}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- DJANGO MESSAGES -->
+
+        {% if messages %}
+
+            <div class="messages">
+
+                {% for message in messages %}
+
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- PAGE -->
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+</div>
+
+
+<!-- MOBILE NAVIGATION SCRIPT -->
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const menuButton =
+            document.getElementById("mobileMenuButton");
+
+        const sidebar =
+            document.getElementById("managementSidebar");
+
+        const overlay =
+            document.getElementById("sidebarOverlay");
+
+
+        function openSidebar() {
+
+            sidebar.classList.add("mobile-open");
+            overlay.classList.add("visible");
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+            document.body.classList.add(
+                "sidebar-open"
+            );
+        }
+
+
+        function closeSidebar() {
+
+            sidebar.classList.remove("mobile-open");
+            overlay.classList.remove("visible");
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            document.body.classList.remove(
+                "sidebar-open"
+            );
+        }
+
+
+        menuButton.addEventListener(
+            "click",
+            function () {
+
+                if (
+                    sidebar.classList.contains(
+                        "mobile-open"
+                    )
+                ) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+
+            }
+        );
+
+
+        overlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+
+        sidebar
+            .querySelectorAll("a")
+            .forEach(function (link) {
+
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            });
+
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+
+            }
+        );
+
+    });
+
+</script>
+
+</body>
+
+</html>
