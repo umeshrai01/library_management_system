@@ -86,7 +86,7 @@ The system supports: - Available and occupied seat tracking - Seat
 assignment - Seat changes - Seat release - Seat allocation history -
 Prevention of conflicting active allocations
 
-## 📚 Subscription Plans
+## Subscription Plans
 
   Plan         Hours/Day   Monthly Fee
   ---------- ----------- -------------
@@ -198,7 +198,7 @@ library_management_system/
     └── asgi.py
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 -   **Python**
 -   **Django 5.2**
